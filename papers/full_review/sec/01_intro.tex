@@ -1,0 +1,143 @@
+\section{Introduction}
+\label{sec:intro}
+
+Sound gives an autonomous system a sense that works around corners, in the dark, through smoke and in every direction at once.
+Cameras and lidar need line of sight and a field of view; microphones need neither.
+A vehicle can hear another vehicle approaching a blind corner more than a second before a visual detector sees it~\cite{schulz2021hearing}.
+A drone can search for a voice it cannot see~\cite{deleforge2019spcup,hoshiba2017uav}.
+An embodied agent finds a sounding object in an unexplored house faster when it listens as well as looks~\cite{chen2020soundspaces,gan2020look}, and a robot arm can complete a task inside an opaque bag by listening to the contact~\cite{du2022playitbyear}.
+
+Despite this, hearing remains the least developed sense on most autonomous platforms.
+The obstacle is not a lack of methods.
+Microphone-array processing is mature~\cite{knapp1976gcc,schmidt1986music,capon1969mvdr}, large pretrained models recognize hundreds of sound classes~\cite{gemmeke2017audioset,kong2020panns,gong2021ast,chen2023beats}, and speech recognition has become robust to many real-world conditions~\cite{radford2023whisper}.
+The obstacle is the platform itself.
+Robots, drones and vehicles move, vibrate and, above all, make noise.
+On a quadrotor, the rotor noise at the drone's own microphones is typically far louder than the sound it is trying to hear~\cite{strauss2018dregon,ruizespitia2018aira}, and on a humanoid, the noise of its own joint motors corrupts what it records whenever it moves~\cite{ince2009template}.
+
+Robot audition emerged as a research field in 2000, when Nakadai \etal proposed \emph{active audition}: a robot that listens while it moves instead of stopping to perceive~\cite{nakadai2000active}.
+The field produced the HARK toolkit~\cite{nakadai2017hark}, real-time localization and tracking on mobile robots~\cite{valin2003robust,valin2007tracking}, and later ODAS for embedded hardware~\cite{grondin2022odas}.
+Since then, three shifts have changed it.
+First, drones became a major platform with an extreme ego-noise problem~\cite{strauss2018dregon,manamperi2022drone,yen2023ncm,chevtchenko2025review}.
+Second, learned models moved from niche to default, including joint detection and localization~\cite{adavanne2019seld,shimada2021accdoa,politis2021dcase}.
+Third, audio became one input among several to embodied and multimodal intelligence, driven largely by the vision and learning communities~\cite{chen2020soundspaces,gao2020visualechoes,li2022seehearfeel,majumder2021move2hear}.
+
+\paragraph{Relation to prior surveys.}
+\Cref{tab:surveys} compares this review with earlier ones.
+Two surveys mapped localization for robots up to 2017~\cite{argentieri2015survey,rascon2017review}; Grumiaux \etal reviewed deep learning for localization in rooms~\cite{grumiaux2022survey}; Mesaros \etal gave a tutorial on sound event detection~\cite{mesaros2021tutorial}; and Chevtchenko \etal systematically reviewed drone-based localization, finding that only three of 49 studies implemented real-time on-board localization~\cite{chevtchenko2025review}.
+To our knowledge, none treats ego-noise across platforms, covers the embodied and audio-visual work of the vision and learning communities, or links the two.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.6pt}
+\begin{tabular}{@{}L{2.55cm}cccccc@{}}
+\toprule
+Survey & Rob. & Drone & Veh. & Ego-n. & Learn. & Embod. \\
+\midrule
+Argentieri~\etal~\cite{argentieri2015survey} & \checkmark & & & partial & & \\
+Rascon, Meza~\cite{rascon2017review} & \checkmark & & & partial & & \\
+Grumiaux~\etal~\cite{grumiaux2022survey} & & & & & \checkmark & \\
+Mesaros~\etal~\cite{mesaros2021tutorial} & & & & & \checkmark & \\
+Chevtchenko~\etal~\cite{chevtchenko2025review} & & \checkmark & & partial & & \\
+\textbf{This review} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\caption{Scope of related surveys: platforms (robots, drones, vehicles), treatment of ego-noise, learned methods, and embodied or multimodal learning.}
+\label{tab:surveys}
+\end{table}
+
+\paragraph{Scope.}
+Our scope is acoustic perception on board a moving, self-powered platform; fixed arrays and smart speakers are included only where their methods transfer, and underwater sonar is excluded.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+\item A task-centered map of the field (\cref{sec:ssl,sec:sed,sec:sep,sec:seld,sec:geometry}) that links classical and learned methods for each task.
+\item A cross-platform treatment of ego-noise (\cref{sec:egonoise}) that organizes suppression methods by the information they exploit.
+\item A review of audio in embodied, audio-visual and language-grounded intelligence (\cref{sec:embodied}).
+\item A guide to datasets, simulators, toolkits (\cref{sec:datasets}) and evaluation protocols (\cref{sec:metrics}).
+\item Reproducible case studies on three public datasets (\cref{sec:case}): in-flight localization on a drone, ego-noise structure across five drones, and localization with a robot-head array. Together they quantify when an explicit noise model and motor-speed information help, and when they do not.
+\item Open problems with concrete directions (\cref{sec:challenges}).
+\end{enumerate}
+\Cref{fig:overview} summarizes the structure, and \cref{fig:timeline} places key milestones in time.
+
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\footnotesize,
+  box/.style={draw=black!60, rounded corners=2pt, align=center, minimum height=0.62cm, text width=2.7cm, fill=white},
+  hd/.style={font=\footnotesize\bfseries, align=center, text width=2.9cm},
+  grp/.style={draw=black!25, fill=black!3, rounded corners=4pt, inner sep=5pt},
+  arr/.style={-{Stealth[length=2mm]}, thick, black!55}]
+\node[hd] (h1) at (0,0) {Platform (\S\ref{sec:platforms})};
+\node[box, below=0.25cm of h1] (p1) {Ground robots,\\humanoids};
+\node[box, below=0.15cm of p1] (p2) {Aerial drones};
+\node[box, below=0.15cm of p2] (p3) {Road vehicles};
+\node[hd] (h2) at (3.85,0) {Acoustic conditions};
+\node[box, below=0.25cm of h2] (c1) {Ego-noise (\S\ref{sec:egonoise})};
+\node[box, below=0.15cm of c1] (c2) {Motion of array\\and sources};
+\node[box, below=0.15cm of c2] (c3) {Wind, reverberation,\\compute};
+\node[hd] (h3) at (7.7,0) {Tasks};
+\node[box, below=0.25cm of h3] (t1) {Localization, tracking\\(\S\ref{sec:ssl})};
+\node[box, below=0.15cm of t1] (t2) {Event detection (\S\ref{sec:sed})};
+\node[box, below=0.15cm of t2] (t3) {Separation,\\enhancement (\S\ref{sec:sep})};
+\node[box, below=0.15cm of t3] (t4) {Joint SELD (\S\ref{sec:seld})};
+\node[box, below=0.15cm of t4] (t5) {Mapping, geometry\\(\S\ref{sec:geometry})};
+\node[hd] (h4) at (11.55,0) {Embodied use (\S\ref{sec:embodied})};
+\node[box, below=0.25cm of h4] (u1) {Navigation to sound};
+\node[box, below=0.15cm of u1] (u2) {Occluded hazard\\detection};
+\node[box, below=0.15cm of u2] (u3) {Search and rescue};
+\node[box, below=0.15cm of u3] (u4) {Manipulation,\\interaction};
+\node[hd] (h5) at (15.4,0) {Side information};
+\node[box, below=0.25cm of h5] (s1) {Motor, joint state};
+\node[box, below=0.15cm of s1] (s2) {IMU, vibration};
+\node[box, below=0.15cm of s2] (s3) {Vision, depth};
+\node[box, below=0.15cm of s3] (s4) {Language};
+\begin{scope}[on background layer]
+\node[grp, fit=(h1)(p3)] (g1) {};
+\node[grp, fit=(h2)(c3)] (g2) {};
+\node[grp, fit=(h3)(t5)] (g3) {};
+\node[grp, fit=(h4)(u4)] (g4) {};
+\node[grp, fit=(h5)(s4)] (g5) {};
+\end{scope}
+\draw[arr] (g1.east |- p2) -- (g2.west |- p2);
+\draw[arr] (g2.east |- c2) -- (g3.west |- c2);
+\draw[arr] (g3.east |- t2) -- (g4.west |- t2);
+\draw[arr] (g5.south) |- node[pos=0.75, below, font=\scriptsize, black!70] {informs ego-noise models and multimodal fusion} ($(g3.south)+(0.6,-0.45)$) -- ($(g3.south)+(0.6,0)$);
+\end{tikzpicture}}
+\caption{Structure of the review. A platform sets the acoustic conditions, of which ego-noise is the most severe. Perception tasks turn microphone signals into events, directions and geometry that embodied agents act on. Side information that only an autonomous platform has (its own motor, motion and visual state) can inform ego-noise models and multimodal fusion.}
+\label{fig:overview}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[font=\scriptsize,
+  ev/.style={align=center, text width=2.05cm, inner sep=1pt},
+  dot/.style={circle, fill=black!65, inner sep=1.3pt}]
+\draw[-{Stealth[length=2mm]}, thick, black!60] (0,0) -- (18.6,0);
+% x = (year - 2000) * 0.72 + 0.3
+\foreach \y/\lab in {2000/2000, 2005/2005, 2010/2010, 2015/2015, 2020/2020, 2025/2025}
+  { \pgfmathsetmacro{\x}{(\y-2000)*0.72+0.3} \draw[black!45] (\x,-0.08) -- (\x,0.08); \node[below, black!60] at (\x,-0.1) {\lab}; }
+% above the axis: robots and drones
+\node[dot] at (0.30,0) {}; \node[ev, above] at (0.30,0.55) {Active audition\\for humanoids~\cite{nakadai2000active}}; \draw[black!35] (0.30,0) -- (0.30,0.55);
+\node[dot] at (2.46,0) {}; \node[ev, above] at (2.46,0.55) {Mobile-robot array\\localization~\cite{valin2003robust}}; \draw[black!35] (2.46,0) -- (2.46,0.55);
+\node[dot] at (6.78,0) {}; \node[ev, above] at (6.06,1.45) {Ego-noise template\\subtraction~\cite{ince2009template}}; \draw[black!35] (6.78,0) -- (6.06,1.45);
+\node[dot] at (8.94,0) {}; \node[ev, above] at (8.94,0.55) {Quadrocopter\\audition~\cite{okutani2012quadrocopter}}; \draw[black!35] (8.94,0) -- (8.94,0.55);
+\node[dot] at (13.26,0) {}; \node[ev, above] at (12.6,1.45) {DREGON drone\\dataset~\cite{strauss2018dregon}}; \draw[black!35] (13.26,0) -- (12.6,1.45);
+\node[dot] at (15.42,0) {}; \node[ev, above] at (14.6,0.55) {Hearing around\\corners~\cite{schulz2021hearing}}; \draw[black!35] (15.42,0) -- (14.6,0.55);
+\node[dot] at (16.86,0) {}; \node[ev, above] at (16.5,1.45) {Rotor-aware noise\\covariance~\cite{yen2023ncm}}; \draw[black!35] (16.86,0) -- (16.5,1.45);
+\node[dot] at (18.30,0) {}; \node[ev, above] at (18.1,0.55) {Rotor-conditioned\\deep models~\cite{gulli2025rotor}}; \draw[black!35] (18.30,0) -- (18.1,0.55);
+% below the axis: learning and embodied
+\node[dot] at (6.06,0) {}; \node[ev, below] at (5.4,-0.6) {HARK open\\source (2008)~\cite{nakadai2017hark}}; \draw[black!35] (6.06,0) -- (5.4,-0.6);
+\node[dot] at (12.54,0) {}; \node[ev, below] at (11.9,-0.6) {AudioSet~\cite{gemmeke2017audioset}}; \draw[black!35] (12.54,0) -- (11.9,-0.6);
+\node[dot] at (13.98,0) {}; \node[ev, below] at (13.3,-1.35) {SELDnet~\cite{adavanne2019seld}}; \draw[black!35] (13.98,0) -- (13.3,-1.35);
+\node[dot] at (14.70,0) {}; \node[ev, below] at (15.0,-0.6) {SoundSpaces,\\LOCATA~\cite{chen2020soundspaces,evers2020locata}}; \draw[black!35] (14.70,0) -- (15.0,-0.6);
+\node[dot] at (16.14,0) {}; \node[ev, below] at (16.5,-1.35) {See, hear\\and feel~\cite{li2022seehearfeel}}; \draw[black!35] (16.14,0) -- (16.5,-1.35);
+\node[dot] at (17.58,0) {}; \node[ev, below] at (18.1,-0.6) {Audio LLMs~\cite{gong2024ltu,tang2024salmonn}}; \draw[black!35] (17.58,0) -- (18.1,-0.6);
+\node[font=\scriptsize\bfseries, black!60, anchor=west] at (-0.1,2.35) {Robots, drones, vehicles};
+\node[font=\scriptsize\bfseries, black!60, anchor=west] at (-0.1,-2.3) {Learning, multimodal, embodied};
+\end{tikzpicture}}
+\caption{Selected milestones in acoustic perception for autonomous systems. Above the axis: platform-centered robot, drone and vehicle audition. Below: learning, audio-visual and embodied work. Positions follow the publication year.}
+\label{fig:timeline}
+\end{figure*}

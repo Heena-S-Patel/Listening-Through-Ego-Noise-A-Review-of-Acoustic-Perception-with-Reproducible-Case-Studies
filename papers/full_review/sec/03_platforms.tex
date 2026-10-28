@@ -1,0 +1,48 @@
+\section{Platforms and Their Acoustic Conditions}
+\label{sec:platforms}
+
+The same algorithm can succeed on a smart speaker and fail on a drone, because the platform decides what the microphones hear.
+\Cref{tab:platforms} compares the three platform families along the dimensions that matter most.
+
+\paragraph{Ground robots and humanoids.}
+Robot audition grew out of humanoid robotics, where the goal was natural interaction: localizing and separating several talkers and recognizing their speech~\cite{nakadai2000active,nakadai2017hark}.
+Mobile robots added real-time localization and tracking with on-board arrays~\cite{valin2003robust,valin2007tracking,grondin2019lightweight}.
+Arrays are small (a head or a torso), the robot often moves, and the dominant ego-noise comes from fans and from joint motors that switch on and off with each gesture or step~\cite{ince2009template,schmidt2016dictionary}.
+Because a robot knows its own joint state, this noise is partly predictable, which has made robots the proving ground for motor-informed ego-noise suppression~\cite{ince2009template,schmidt2018egonoise,schmidt2019informed}.
+Robot manipulators increasingly use sound as a contact sensor, for example to estimate liquid height while pouring~\cite{liang2019pouring} or to act inside occluded containers~\cite{du2022playitbyear}.
+
+\paragraph{Aerial drones.}
+Drones are the hardest case.
+Microphones sit tens of centimeters from rotors spinning thousands of times per minute, and the rotor noise combines strong harmonics of each rotor's shaft rate with broadband aerodynamic noise~\cite{strauss2018dregon,yen2023ncm}.
+Recordings of drone ego-noise have very low SNR, change with the drone's maneuvers, and are highly correlated across microphones~\cite{ruizespitia2018aira}.
+Drone audition is motivated mainly by search and rescue: 82\% of the 49 studies in a recent systematic review target this use~\cite{chevtchenko2025review}, and fielded systems have localized voices from the air in outdoor demonstrations~\cite{hoshiba2017uav}.
+Early work localized sources outdoors with an array embedded in a quadrocopter~\cite{okutani2012quadrocopter} and learned the rotor-noise correlation matrix to suppress it~\cite{furukawa2013ncm}.
+Public datasets now provide on-board recordings with ground truth~\cite{strauss2018dregon,wang2019avq,ruizespitia2018aira}.
+Payload and power budgets limit both the array and the on-board compute.
+
+\paragraph{Road vehicles.}
+Vehicles use sound mainly for safety: detecting emergency vehicles and hazards that are not yet visible.
+Early work modeled the urban soundscape to detect horns and sirens as anomalies~\cite{marchegiani2017urban}, and later work localized and classified sirens from stereo recordings by segmenting spectrograms~\cite{marchegiani2022sirens}.
+A roof-mounted array can detect a vehicle approaching a blind corner from reflections off nearby walls, before it enters line of sight~\cite{schulz2021hearing}, and even two low-cost microphones can detect sirens and estimate their direction~\cite{sun2021siren}.
+Self-supervised learning from stereo sound has been used to track moving vehicles, with a visual network as teacher~\cite{gan2019stereo}.
+The main noise sources are the vehicle's own engine and tires and, at speed, wind at the microphones.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}L{1.55cm}L{2.0cm}L{2.0cm}L{2.0cm}@{}}
+\toprule
+ & Ground robots & Drones & Vehicles \\
+\midrule
+Main use & interaction, speech, manipulation & search and rescue & safety, occlusion \\
+Ego-noise & fans, joint motors & rotors (tonal and broadband) & engine, tires, wind \\
+Noise varies with & joint motion & rotor speed & speed, road \\
+Side info & joint state & motor speed, IMU & speed, CAN data \\
+Array size & head or torso & limited by payload & roof, large \\
+Key refs & \cite{nakadai2000active,valin2007tracking,ince2009template,schmidt2018egonoise} & \cite{strauss2018dregon,furukawa2013ncm,yen2023ncm,hoshiba2017uav} & \cite{schulz2021hearing,marchegiani2017urban,marchegiani2022sirens,gan2019stereo} \\
+\bottomrule
+\end{tabular}
+\caption{Acoustic conditions on the three platform families. In every case the platform's own state carries information about its noise, which static devices do not have.}
+\label{tab:platforms}
+\end{table}

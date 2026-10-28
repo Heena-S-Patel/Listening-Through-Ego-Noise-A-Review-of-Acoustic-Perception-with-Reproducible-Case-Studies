@@ -1,0 +1,223 @@
+{
+  "by_task": {
+    "1": {
+      "A_SRP-PHAT": {
+        "n": 34,
+        "median_deg": 4.759975024270954,
+        "mean_deg": 3.396454248300613,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      },
+      "C_MUSIC": {
+        "n": 34,
+        "median_deg": 3.1411368893158733,
+        "mean_deg": 4.251906327470552,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 34,
+        "median_deg": 3.1906132107024496,
+        "mean_deg": 3.531447056602844,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      },
+      "D0_GEVD-MUSIC_noguard": {
+        "n": 34,
+        "median_deg": 2.794940147191293,
+        "mean_deg": 3.3612543326037407,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      }
+    },
+    "3": {
+      "A_SRP-PHAT": {
+        "n": 151,
+        "median_deg": 2.806957211250133,
+        "mean_deg": 5.118766419625734,
+        "acc@10deg": 0.9139072847682119,
+        "acc@20deg": 0.9668874172185431
+      },
+      "C_MUSIC": {
+        "n": 151,
+        "median_deg": 3.177585616350827,
+        "mean_deg": 6.220810877405887,
+        "acc@10deg": 0.8609271523178808,
+        "acc@20deg": 0.9403973509933775
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 151,
+        "median_deg": 5.35286730061092,
+        "mean_deg": 36.73051638438384,
+        "acc@10deg": 0.695364238410596,
+        "acc@20deg": 0.7019867549668874
+      },
+      "D0_GEVD-MUSIC_noguard": {
+        "n": 151,
+        "median_deg": 7.981782180106529,
+        "mean_deg": 30.388137663784118,
+        "acc@10deg": 0.5827814569536424,
+        "acc@20deg": 0.6887417218543046
+      }
+    },
+    "5": {
+      "A_SRP-PHAT": {
+        "n": 211,
+        "median_deg": 2.811935726155108,
+        "mean_deg": 3.469810571467198,
+        "acc@10deg": 0.990521327014218,
+        "acc@20deg": 1.0
+      },
+      "C_MUSIC": {
+        "n": 211,
+        "median_deg": 2.811935726155108,
+        "mean_deg": 4.057480333529693,
+        "acc@10deg": 0.957345971563981,
+        "acc@20deg": 0.995260663507109
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 211,
+        "median_deg": 3.9539535474965497,
+        "mean_deg": 31.311364826260682,
+        "acc@10deg": 0.6824644549763034,
+        "acc@20deg": 0.6919431279620853
+      },
+      "D0_GEVD-MUSIC_noguard": {
+        "n": 211,
+        "median_deg": 4.556969761612653,
+        "mean_deg": 15.810356432783443,
+        "acc@10deg": 0.8104265402843602,
+        "acc@20deg": 0.8436018957345972
+      }
+    }
+  },
+  "overall": {
+    "A_SRP-PHAT": {
+      "n": 396,
+      "median_deg": 2.8094308384419224,
+      "mean_deg": 4.092280819154761,
+      "acc@10deg": 0.9621212121212122,
+      "acc@20deg": 0.9873737373737373
+    },
+    "C_MUSIC": {
+      "n": 396,
+      "median_deg": 3.125490596602652,
+      "mean_deg": 4.899079818174376,
+      "acc@10deg": 0.9242424242424242,
+      "acc@20deg": 0.9747474747474747
+    },
+    "D_GEVD-MUSIC_globalNCM": {
+      "n": 396,
+      "median_deg": 4.285032128386815,
+      "mean_deg": 30.992614020978436,
+      "acc@10deg": 0.7146464646464646,
+      "acc@20deg": 0.7222222222222222
+    },
+    "D0_GEVD-MUSIC_noguard": {
+      "n": 396,
+      "median_deg": 5.136713832629976,
+      "mean_deg": 20.300193540043526,
+      "acc@10deg": 0.73989898989899,
+      "acc@20deg": 0.797979797979798
+    }
+  },
+  "recordings": [
+    {
+      "task": 1,
+      "recording": "recording1",
+      "windows": 6,
+      "noise_frames": 89,
+      "guard_used_s": 0.0,
+      "snr_db": 24.302160263061523,
+      "noise_top4_share": 0.75068199634552,
+      "diffuse_top4_share": 0.7920240124104374
+    },
+    {
+      "task": 1,
+      "recording": "recording2",
+      "windows": 13,
+      "noise_frames": 29,
+      "guard_used_s": 0.5,
+      "snr_db": 25.298751831054688,
+      "noise_top4_share": 0.7584648728370667,
+      "diffuse_top4_share": 0.7920240124104374
+    },
+    {
+      "task": 1,
+      "recording": "recording3",
+      "windows": 15,
+      "noise_frames": 186,
+      "guard_used_s": 0.0,
+      "snr_db": 23.128753662109375,
+      "noise_top4_share": 0.7690016627311707,
+      "diffuse_top4_share": 0.7920240124104374
+    },
+    {
+      "task": 3,
+      "recording": "recording1",
+      "windows": 43,
+      "noise_frames": 403,
+      "guard_used_s": 0.5,
+      "snr_db": 20.628311157226562,
+      "noise_top4_share": 0.841903805732727,
+      "diffuse_top4_share": 0.7920240124104383
+    },
+    {
+      "task": 3,
+      "recording": "recording2",
+      "windows": 62,
+      "noise_frames": 327,
+      "guard_used_s": 0.5,
+      "snr_db": 19.58279800415039,
+      "noise_top4_share": 0.7473243474960327,
+      "diffuse_top4_share": 0.7920240124104347
+    },
+    {
+      "task": 3,
+      "recording": "recording3",
+      "windows": 46,
+      "noise_frames": 456,
+      "guard_used_s": 0.5,
+      "snr_db": 17.375762939453125,
+      "noise_top4_share": 0.8530882000923157,
+      "diffuse_top4_share": 0.7920240124104408
+    },
+    {
+      "task": 5,
+      "recording": "recording1",
+      "windows": 61,
+      "noise_frames": 188,
+      "guard_used_s": 0.5,
+      "snr_db": 15.863066673278809,
+      "noise_top4_share": 0.8848670125007629,
+      "diffuse_top4_share": 0.792024012410449
+    },
+    {
+      "task": 5,
+      "recording": "recording2",
+      "windows": 85,
+      "noise_frames": 441,
+      "guard_used_s": 0.5,
+      "snr_db": 18.064346313476562,
+      "noise_top4_share": 0.7633410692214966,
+      "diffuse_top4_share": 0.7920240124104477
+    },
+    {
+      "task": 5,
+      "recording": "recording3",
+      "windows": 65,
+      "noise_frames": 1396,
+      "guard_used_s": 0.5,
+      "snr_db": 21.86739730834961,
+      "noise_top4_share": 0.8153610229492188,
+      "diffuse_top4_share": 0.7920240124104436
+    }
+  ],
+  "noise_top4_share_white_reference": 0.3333333333333333,
+  "guard_s": 0.5,
+  "tasks": {
+    "1": "static source, static array",
+    "3": "moving talker, static array",
+    "5": "moving talker, moving array"
+  }
+}

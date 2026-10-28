@@ -1,0 +1,20 @@
+\section{Acoustic Mapping, Echoes and Geometry}
+\label{sec:geometry}
+
+Sound also reveals the space around a platform, which matters most when vision is degraded.
+
+\paragraph{Mapping from sources.}
+Acoustic SLAM jointly estimates the trajectory of a moving array and a map of the surrounding sources from direction-of-arrival measurements~\cite{evers2018slam}.
+
+\paragraph{Active echoes.}
+A platform that emits sound can infer geometry from the echoes.
+BatVision predicts depth and spatial layout from binaural recordings of emitted chirps~\cite{christensen2020batvision}, and VisualEchoes learns spatial image representations through echolocation, which transfer to depth estimation and navigation~\cite{gao2020visualechoes}.
+
+\paragraph{Geometry from ambient and binaural sound.}
+Audio-visual floorplan reconstruction uses sound to infer the layout of rooms the camera has not seen~\cite{purushwalkam2021floorplan}.
+Binaural recordings can predict the semantic segmentation and depth of the surrounding scene and can be super-resolved spatially~\cite{vasudevan2020binaural}, and video can turn mono audio into binaural audio by exploiting the visible scene layout~\cite{gao2019visualsound}.
+
+\paragraph{Acoustic rendering.}
+Neural acoustic fields learn a continuous model of how sound propagates between any emitter and listener position in a scene~\cite{luo2022naf}.
+Visual acoustic matching re-renders a recording to sound as if it were made in the room shown in an image~\cite{chen2022vam}, and novel-view acoustic synthesis predicts what a scene sounds like from a new viewpoint~\cite{chen2023nvas}.
+These models give an agent an internal model of room acoustics, which could in turn support prediction of what it should hear and hence anomaly detection.

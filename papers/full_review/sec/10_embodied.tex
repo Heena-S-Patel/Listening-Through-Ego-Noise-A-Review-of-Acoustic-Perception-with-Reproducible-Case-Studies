@@ -1,0 +1,53 @@
+\section{Audio in Embodied and Multimodal Intelligence}
+\label{sec:embodied}
+
+Much of the recent progress in machine hearing for agents has come from the vision and learning communities, where sound is treated as one modality of an embodied agent rather than as a signal to be cleaned.
+\Cref{tab:embodied} summarizes representative work.
+
+\paragraph{Audio-visual navigation.}
+SoundSpaces introduced navigation to a sounding target in realistic scanned 3D environments, with audio rendered by geometric acoustic simulation, and showed that audio improves embodied navigation~\cite{chen2020soundspaces}.
+Gan \etal proposed a parallel formulation with a visual mapper, a sound-localization module and a planner~\cite{gan2020look}.
+Follow-up work learned to set waypoints with an acoustic memory~\cite{chen2021waypoints}, extended the task to semantically meaningful sounding objects~\cite{chen2021semantic}, and to moving sound sources amid distracting noise~\cite{younes2023catch}.
+Simulation platforms have matured: SoundSpaces~2.0 renders continuous, configurable acoustics for visual-acoustic learning~\cite{chen2022soundspaces2}, and Sonicverse provides a multisensory household simulator for agents that see and hear~\cite{gao2023sonicverse}.
+These platforms make large-scale training possible, but they usually omit the agent's own ego-noise, which \cref{sec:egonoise,sec:case} show is the dominant difficulty on real platforms.
+
+\paragraph{Self-supervised audio-visual learning.}
+Correspondence between sight and sound is a strong free supervisory signal.
+Ambient sound supervises visual representation learning~\cite{owens2016ambient}; audio-visual correspondence localizes sounding objects in images~\cite{arandjelovic2018objects,senocak2018localize}; audio-visual events can be localized in time in unconstrained video~\cite{tian2018ave}; and audio-visual objects can be discovered and tracked from unlabeled video~\cite{afouras2020avobjects}.
+For autonomous vehicles, a visual network has served as teacher for tracking vehicles from stereo sound~\cite{gan2019stereo}, and binaural recordings have been used to predict semantic segmentation and depth~\cite{vasudevan2020binaural}.
+Sound can also detect what vision cannot yet see: an acoustic detector anticipated vehicles behind blind corners more than a second before a visual detector reached the same accuracy~\cite{schulz2021hearing}.
+
+\paragraph{Manipulation and interaction.}
+Audio carries contact information.
+Fusing vision, audio from a contact microphone, and touch improves robotic manipulation on dense packing and pouring~\cite{li2022seehearfeel}; audio estimates liquid height during pouring~\cite{liang2019pouring}; audio helps imitation learning when the scene is visually occluded, reaching 70\% success on extracting keys from a bag, which the authors report is 50\% higher than a policy without audio~\cite{du2022playitbyear}; and object-centric datasets pair visual, auditory and tactile representations of the same objects~\cite{gao2021objectfolder}.
+
+\paragraph{Audio and language.}
+Contrastive language-audio pretraining links sounds to text and enables zero-shot classification~\cite{elizalde2023clap}.
+Audio language models now cast audio tasks as text generation~\cite{deshmukh2023pengi}, and perceive and reason about general sounds, speech and music~\cite{gong2024ltu,tang2024salmonn}.
+For autonomous systems, these models promise open-vocabulary event detection and natural-language reports of what the platform hears.
+Their robustness to ego-noise and their latency on embedded hardware are, as far as we are aware, untested.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.4pt}
+\begin{tabular}{@{}L{2.25cm}L{1.3cm}L{2.0cm}L{1.45cm}@{}}
+\toprule
+Work & Venue & Contribution & Setting \\
+\midrule
+SoundSpaces~\cite{chen2020soundspaces} & ECCV'20 & audio-visual navigation & simulation \\
+Gan \etal~\cite{gan2020look} & ICRA'20 & mapper + sound + planner & simulation \\
+Waypoints~\cite{chen2021waypoints} & ICLR'21 & acoustic memory & simulation \\
+Semantic AV-Nav~\cite{chen2021semantic} & CVPR'21 & semantic sounding goals & simulation \\
+Move2Hear~\cite{majumder2021move2hear} & ICCV'21 & move to separate & simulation \\
+SoundSpaces 2.0~\cite{chen2022soundspaces2} & NeurIPS'22 & continuous acoustics & simulation \\
+Catch me if you hear me~\cite{younes2023catch} & RA-L'23 & moving sound sources & simulation \\
+Sonicverse~\cite{gao2023sonicverse} & ICRA'23 & multisensory household & simulation \\
+See, Hear, Feel~\cite{li2022seehearfeel} & CoRL'22 & vision, audio, touch & real robot \\
+Play it by Ear~\cite{du2022playitbyear} & RSS'22 & audio under occlusion & real robot \\
+Hearing around corners~\cite{schulz2021hearing} & RA-L'21 & occluded vehicles & real vehicle \\
+\bottomrule
+\end{tabular}
+\caption{Representative embodied and multimodal work that uses sound. Most audio-visual navigation is still developed in simulation without ego-noise.}
+\label{tab:embodied}
+\end{table}

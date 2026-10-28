@@ -1,0 +1,46 @@
+\section{Open Challenges and Research Directions}
+\label{sec:challenges}
+
+\paragraph{1. Hearing below $-15$\,dB.}
+On drones, even noise-model methods fail between $-15$ and $-20$\,dB (\cref{sec:case-dregon}), yet distant calls for help fall in exactly this range.
+Smooth, physically grounded noise models that vary with each rotor's speed~\cite{yen2023ncm}, combined with learned suppression~\cite{wang2022drone,gulli2025rotor}, are the most promising route.
+Hybrid methods that first remove tones predicted from the motor state and then whiten the remaining spatial noise exploit complementary structure.
+Longer integration windows help when the target is persistent, but conflict with the motion of the platform; tracking with motion compensation (direction 5) can bridge the two.
+
+\paragraph{2. From masking to cancellation with vibration references.}
+Motor state gives the frequencies of rotor and motor tones but not their phase.
+A high-rate vibration sensor near each motor, combined with order tracking, could supply a phase-coherent reference and allow tones to be subtracted rather than masked.
+Standard flight-controller IMUs are sampled too slowly for this (\cref{sec:case-dregon}), so dedicated sensors are needed; to our knowledge this direction is largely unexplored on autonomous platforms.
+Its value depends on the drone: the tonal share of ego-noise ranged from 1\% to 70\% across the five drones of \cref{sec:case-drones}. Rotor-speed variation in flight also smears the tones. Tonality should therefore be measured in flight before tone cancellation is pursued.
+
+\paragraph{3. Transfer across platforms.}
+Ego-noise models are platform-specific, and learned models trained on one drone or robot rarely transfer.
+Our multi-drone analysis suggests a starting point: on every drone, a spatial noise model learned from the first half of a recording of tens of seconds remained valid on the second half (\cref{sec:case-drones}), so short calibration flights may suffice.
+Self-supervised adaptation from such recordings, and models conditioned on platform geometry and state rather than identity, would reduce the cost of deploying audition on a new platform.
+Array design matters as much as the algorithm: on a 6\,cm array a spatial model removed less ego-noise than it would remove from diffuse noise.
+Large pretrained audio encoders~\cite{kong2020panns,gong2021ast,chen2023beats} are a natural starting point if they can be made robust to ego-noise.
+
+\paragraph{4. Simulation with ego-noise.}
+Embodied simulators render room acoustics well~\cite{chen2022soundspaces2,gao2023sonicverse,luo2022naf} but omit the agent's own noise.
+Adding parametric ego-noise driven by the simulated platform's state, calibrated on real recordings such as DREGON or AIRA-UAS~\cite{strauss2018dregon,ruizespitia2018aira}, would make sim-to-real transfer of audio-visual policies far more credible.
+
+\paragraph{5. Temporal reasoning, active listening and confidence.}
+A platform should also decide \emph{which} method to trust: in our studies a noise model was essential on a drone but cost accuracy on a quiet robot head (\cref{sec:case-locata}), so selecting or weighting methods from the measured SNR and noise structure is a practical first step.
+Most localizers decide each short window independently.
+Tracking with the platform's own motion compensated~\cite{valin2007tracking,evers2018slam,evers2020locata} and calibrated confidence from the sharpness of the spatial spectrum would let an agent know when it is wrong.
+An agent that knows it is uncertain can also act to listen better, by moving~\cite{nakadai2000active,majumder2021move2hear} or, on a drone, by briefly changing its rotor speeds.
+
+\paragraph{6. Open-vocabulary hearing.}
+Audio-language models~\cite{elizalde2023clap,deshmukh2023pengi,gong2024ltu,tang2024salmonn} could let a platform report what it hears in words and search for sounds described in language.
+Their robustness to ego-noise, their latency and their energy cost on embedded hardware have yet to be measured.
+
+\paragraph{7. Benchmarks that match the problem.}
+A shared benchmark with a moving platform, real ego-noise, platform state, high-rate vibration sensing, realistic intermittent sources (calls, whistles, speech) and video (\cref{sec:datasets}), evaluated with the protocols of \cref{sec:metrics} and archived with a persistent identifier, would align robot audition, drone audition and embodied learning around one problem.
+
+\paragraph{8. Efficiency and energy.}
+Few drone localization systems run in real time on board~\cite{chevtchenko2025review}.
+Method papers should report computational cost on embedded hardware alongside accuracy, as lightweight localization work already does~\cite{grondin2019lightweight}.
+
+\paragraph{9. Privacy and responsible use.}
+Always-on microphones on robots, drones and vehicles can record people who have not consented.
+Processing on board, keeping only the outputs a task needs (events and directions rather than raw audio), and suppressing speech content when it is not needed are practical safeguards that systems and benchmarks should support.

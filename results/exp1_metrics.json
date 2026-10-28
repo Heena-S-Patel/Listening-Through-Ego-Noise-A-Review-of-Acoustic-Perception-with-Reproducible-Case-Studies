@@ -1,0 +1,53 @@
+{
+  "recording": "DREGON_free-flight_nosource_room1",
+  "motor_speed_kind": "measured",
+  "speed_scale": 1.0,
+  "duration_s": 71.13145124716553,
+  "energy_by_band": [
+    {
+      "band_hz": "50-500",
+      "energy_share_bpf_tones": 0.21373113989830017,
+      "bin_share_bpf_tones": 0.24340706479167545,
+      "energy_share_all_shaft_tones": 0.5015093088150024,
+      "bin_share_all_shaft_tones": 0.49137416539222006
+    },
+    {
+      "band_hz": "500-1000",
+      "energy_share_bpf_tones": 0.37996795773506165,
+      "bin_share_bpf_tones": 0.31361729751323414,
+      "energy_share_all_shaft_tones": 0.5854362845420837,
+      "bin_share_all_shaft_tones": 0.5541296314790769
+    },
+    {
+      "band_hz": "1000-2000",
+      "energy_share_bpf_tones": 0.41956233978271484,
+      "bin_share_bpf_tones": 0.3358134425247202,
+      "energy_share_all_shaft_tones": 0.6213229894638062,
+      "bin_share_all_shaft_tones": 0.5910524651286655
+    },
+    {
+      "band_hz": "2000-4000",
+      "energy_share_bpf_tones": 0.3656688928604126,
+      "bin_share_bpf_tones": 0.34695728885782046,
+      "energy_share_all_shaft_tones": 0.5895909070968628,
+      "bin_share_all_shaft_tones": 0.5950535137654401
+    },
+    {
+      "band_hz": "4000-8000",
+      "energy_share_bpf_tones": 0.34370139241218567,
+      "bin_share_bpf_tones": 0.3487993199688321,
+      "energy_share_all_shaft_tones": 0.5939621925354004,
+      "bin_share_all_shaft_tones": 0.595200196675681
+    }
+  ],
+  "mean_coherence_by_band": {
+    "50-500": 0.07383448630571365,
+    "500-1000": 0.25786304473876953,
+    "1000-2000": 0.2277495115995407,
+    "2000-4000": 0.1388101726770401,
+    "4000-8000": 0.0848248153924942
+  },
+  "imu_rate_hz": 1006.0695610458143,
+  "imu_nyquist_hz": 503.03478052290717,
+  "lowest_blade_passing_freq_hz": 140.4692
+}

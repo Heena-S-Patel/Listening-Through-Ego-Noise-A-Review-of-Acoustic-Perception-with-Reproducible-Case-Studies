@@ -1,0 +1,63 @@
+\section{Sound Source Localization and Tracking}
+\label{sec:ssl}
+
+Localization is the most studied task in robot audition and the one most affected by ego-noise.
+\Cref{tab:ssl} summarizes representative methods.
+
+\subsection{Classical methods}
+Generalized cross-correlation with phase transform (GCC-PHAT) estimates the time delay between each pair of microphones~\cite{knapp1976gcc}.
+Steered response power with phase transform (SRP-PHAT) sums these correlations over all pairs for every candidate direction and picks the maximum~\cite{dibiase2000srp}.
+Subspace methods such as MUSIC~\cite{schmidt1986music} split $\mathbf{R}_x(f)$ into signal and noise subspaces and search for steering vectors (\cref{eq:steer}) orthogonal to the latter.
+Both assume that noise is spatially white, which ego-noise is not (\cref{sec:egonoise}).
+Generalized eigenvalue decomposition MUSIC (GEVD-MUSIC) removes this assumption by whitening with a noise covariance $\mathbf{R}_n(f)$, solving
+\begin{equation}
+\mathbf{R}_x(f)\,\mathbf{e} = \lambda\, \mathbf{R}_n(f)\,\mathbf{e};
+\label{eq:gevd}
+\end{equation}
+it improved robot localization robustness by 5 to 6\,dB SNR~\cite{nakamura2011gevd} and became the basis of drone audition~\cite{okutani2012quadrocopter,furukawa2013ncm}.
+
+On mobile robots, Valin \etal localized sources with an eight-microphone array in real time~\cite{valin2003robust} and then combined a frequency-domain steered beamformer with a particle filter to track several moving sources over about 7\,m~\cite{valin2007tracking}.
+Later work reduced the cost of SRP-PHAT by coarse-to-fine scanning and tracked directions with a modified Kalman filter, using up to four and thirty times less computation respectively~\cite{grondin2019lightweight}; these methods underlie the ODAS toolkit~\cite{grondin2022odas}.
+
+\subsection{Binaural and active localization}
+Two-microphone systems use interaural cues.
+Deep networks that map the full cross-correlation function and interaural level differences to azimuth, combined with head rotation to resolve front-back confusions, localize multiple sources robustly in reverberant rooms~\cite{ma2017binaural}.
+More generally, an agent can move to hear better: active audition listens during motion rather than in stop-perceive-act cycles~\cite{nakadai2000active}, and Move2Hear learns where to move to improve source separation~\cite{majumder2021move2hear}.
+
+\subsection{Learned methods}
+Neural localizers learn the map from multichannel features (phase maps, GCC features, SRP maps or raw spectrograms) to directions, by classification over a grid or by regression.
+A convolutional network trained on noise signals generalizes to speech~\cite{chakrabarty2017doa}; deep networks localize and detect multiple speakers from a robot~\cite{he2018multispeaker}; and Cross3D tracks a source in strongly reverberant rooms by running a causal 3D convolutional network over SRP-PHAT maps, trained on simulated trajectories and evaluated on real LOCATA recordings~\cite{diazguerra2021cross3d}.
+Grumiaux \etal survey this literature in depth~\cite{grumiaux2022survey}.
+On drones, a neural time-frequency mask that suppresses ego-noise before SRP-based or spatial-filtering localization outperforms either component alone~\cite{wang2022drone}, and a TDOA-based method with noise angular spectrum subtraction works at low signal-to-drone-noise ratios on an irregular on-board array~\cite{manamperi2022drone}.
+
+\subsection{Tracking}
+Moving platforms need temporally consistent estimates.
+Particle filters~\cite{valin2007tracking} and Kalman filters~\cite{grondin2019lightweight} link frame-wise estimates and suppress isolated errors.
+The LOCATA challenge benchmarks localization and tracking from single static sources up to multiple moving sources observed by a moving array~\cite{evers2020locata}.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.4pt}
+\begin{tabular}{@{}L{2.5cm}L{1.3cm}L{1.85cm}L{1.45cm}@{}}
+\toprule
+Method & Venue & Key idea & Platform \\
+\midrule
+GCC-PHAT~\cite{knapp1976gcc} & TASSP'76 & pairwise delay & any \\
+SRP-PHAT~\cite{dibiase2000srp} & thesis'00 & steered power & any \\
+MUSIC~\cite{schmidt1986music} & TAP'86 & signal subspace & any \\
+Active audition~\cite{nakadai2000active} & AAAI'00 & listen while moving & humanoid \\
+Valin \etal~\cite{valin2007tracking} & RAS'07 & beamformer + particle filter & mobile robot \\
+GEVD-MUSIC~\cite{nakamura2011gevd} & IROS'11 & noise whitening & robot \\
+Okutani \etal~\cite{okutani2012quadrocopter} & IROS'12 & GEVD on a quadrocopter & drone \\
+Chakrabarty, Habets~\cite{chakrabarty2017doa} & WASPAA \mbox{'17} & CNN on phase & static \\
+Ma \etal~\cite{ma2017binaural} & TASLP'17 & DNN + head motion & binaural head \\
+He \etal~\cite{he2018multispeaker} & ICRA'18 & DNN, multi-speaker & robot \\
+Cross3D~\cite{diazguerra2021cross3d} & TASLP'21 & 3D CNN on SRP maps & static \\
+Wang, Cavallaro~\cite{wang2022drone} & Sens.\,J'22 & DNN mask + SRP & drone \\
+Manamperi \etal~\cite{manamperi2022drone} & TASLP'22 & TDOA + noise subtraction & drone \\
+\bottomrule
+\end{tabular}
+\caption{Representative sound source localization methods, ordered from classical to learned.}
+\label{tab:ssl}
+\end{table}

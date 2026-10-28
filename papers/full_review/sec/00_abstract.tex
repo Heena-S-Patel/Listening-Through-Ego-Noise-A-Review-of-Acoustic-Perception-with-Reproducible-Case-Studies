@@ -1,0 +1,11 @@
+\begin{abstract}
+Autonomous systems that hear can detect and locate events that cameras and lidar miss, such as a siren behind a building or a voice under rubble, yet audition remains the least developed sense on robots, drones and vehicles.
+This review surveys acoustic perception for these three platform families across six tasks: localization and tracking, event detection, separation and enhancement, joint localization and detection, acoustic mapping, and audio-driven embodied behavior, tracing each from array signal processing to learned, multimodal and language-grounded models.
+We argue that one problem sets the field apart from audio on static devices: \emph{ego-noise}, the sound a platform makes itself.
+When it dominates, methods that model it explicitly, especially with the platform's own motor or joint state, outperform those that treat it as generic interference.
+We review datasets, simulators, toolkits and evaluation protocols, and report reproducible case studies on three public datasets.
+On a drone, a learned rotor-noise model raises in-flight localization accuracy within $10^\circ$ from 18\% to 70\%, motor speed helps most when the target is quiet, and the model gives about 10\,dB of beamforming gain.
+Across five drones, the tonal share of ego-noise ranges from 1\% to 70\%. The highest values come from drones that were not flying, and rotor-speed variation in flight lowers the tonal share. A learned spatial model removes 6 to 13\,dB on every drone.
+On a robot-head array without ego-noise, the same model lowers accuracy for moving talkers. This marks where such models stop helping.
+We close with open problems, from hearing at very low signal-to-noise ratios and vibration-referenced noise cancellation to transfer across platforms and privacy.
+\end{abstract}

@@ -1,0 +1,20 @@
+\section{Sound Event Detection and Classification}
+\label{sec:sed}
+
+Detection answers \emph{what} is sounding and \emph{when}; Mesaros \etal give a tutorial treatment of the task, its methods and its evaluation~\cite{mesaros2021tutorial}.
+
+\paragraph{Data.}
+Large labeled collections made modern detectors possible.
+ESC-50 provides 2{,}000 five-second clips over 50 environmental classes~\cite{piczak2015esc}; AudioSet provides a sound-event ontology and about two million human-labeled 10-second clips from web video~\cite{gemmeke2017audioset}; FSD50K provides over 51k openly licensed clips labeled with 200 AudioSet classes~\cite{fonseca2022fsd50k}; and VGGSound provides about 200k web videos whose audio and visual content correspond~\cite{chen2020vggsound}.
+
+\paragraph{Models.}
+Pretrained audio neural networks (PANNs) trained on AudioSet transfer well to downstream tasks~\cite{kong2020panns}.
+The Audio Spectrogram Transformer (AST) showed that a convolution-free, attention-only model reaches state-of-the-art accuracy, 0.485 mAP on AudioSet~\cite{gong2021ast}.
+BEATs learns general audio representations by self-supervised prediction of discrete labels from an acoustic tokenizer~\cite{chen2023beats}.
+Contrastive language-audio pretraining (CLAP) aligns audio with text and enables zero-shot classification of classes never seen in training~\cite{elizalde2023clap}.
+
+\paragraph{On autonomous platforms.}
+These models are trained on clean web audio, while a platform hears targets at low SNR under its own noise; domain shift is therefore the central challenge.
+Vehicle work has addressed it with task-specific pipelines: modeling the urban soundscape to detect anomalous alerting sounds and then classifying them~\cite{marchegiani2017urban}, treating spectrograms as images to segment sirens from background noise before classifying and localizing them~\cite{marchegiani2022sirens}, and detecting sirens and their direction with only two low-cost microphones~\cite{sun2021siren}.
+Robot manipulators use detection-style models to infer physical state from sound, for example liquid height during pouring~\cite{liang2019pouring}.
+Few of these systems have been tested under the strong ego-noise of drones, and we are not aware of a public benchmark for multi-class event detection on board a drone.

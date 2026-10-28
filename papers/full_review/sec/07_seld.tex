@@ -1,0 +1,17 @@
+\section{Joint Sound Event Localization and Detection}
+\label{sec:seld}
+
+Sound event localization and detection (SELD) estimates class, activity and direction together, which is the natural output format for an autonomous system that must know both what is happening and where.
+
+\paragraph{Methods.}
+SELDnet, a convolutional recurrent network, introduced joint detection and direction-of-arrival regression for overlapping sources~\cite{adavanne2019seld}.
+The activity-coupled Cartesian DOA (ACCDOA) representation merged the two outputs into a single vector per class, whose length encodes activity and whose direction encodes the source direction~\cite{shimada2021accdoa}.
+Event-independent networks assign overlapping events to separate output tracks~\cite{cao2021einv2}.
+
+\paragraph{Evaluation.}
+The first SELD evaluation, run in DCASE 2019, ranked systems by localization and detection scored separately; joint metrics that require an event to be both correctly detected and close to its true direction changed the ranking of several systems~\cite{politis2021dcase}.
+STARSS23 provides real recordings with spatiotemporal annotations together with 360-degree video, and shows that visual cues reduce localization error~\cite{shimada2023starss23}.
+
+\paragraph{Gap.}
+All SELD benchmarks so far use static arrays without ego-noise.
+Moving SELD to robots and drones requires both new data and methods that model the platform's own noise.

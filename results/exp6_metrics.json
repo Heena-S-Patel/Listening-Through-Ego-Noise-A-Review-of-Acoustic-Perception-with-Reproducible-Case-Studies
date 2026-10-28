@@ -1,0 +1,68 @@
+{
+  "recordings": [
+    {
+      "name": "DREGON",
+      "drone": "Quadrotor (DREGON)",
+      "seconds": 50.0,
+      "files": 1,
+      "tonal_share": 0.1565457135438919,
+      "spatial_rank4": 0.9116070866584778,
+      "learned_rejection_db": 10.093374037666482,
+      "diffuse_rank4": 0.7240390474862058,
+      "diffuse_rejection_db": 5.591523647010521
+    },
+    {
+      "name": "Diagonal_Unloading",
+      "drone": "DJI Phantom 4 Pro",
+      "seconds": 45.0,
+      "files": 2,
+      "tonal_share": 0.08589950203895569,
+      "spatial_rank4": 0.8686249256134033,
+      "learned_rejection_db": 8.227703585111268,
+      "diffuse_rank4": 0.9874158917895706,
+      "diffuse_rejection_db": 19.00177555881403
+    },
+    {
+      "name": "AGH",
+      "drone": "Quadrotor in anechoic chamber",
+      "seconds": 138.4,
+      "files": 5,
+      "tonal_share": 0.34351291619241237,
+      "spatial_rank4": 0.9461803913116456,
+      "learned_rejection_db": 12.94619215544308,
+      "diffuse_rank4": null,
+      "diffuse_rejection_db": null
+    },
+    {
+      "name": "KU_Leuven",
+      "drone": "MK Quadro V3",
+      "seconds": 28.5,
+      "files": 2,
+      "tonal_share": 0.6965523660182953,
+      "spatial_rank4": 0.8827076554298401,
+      "learned_rejection_db": 8.59592375761216,
+      "diffuse_rank4": 0.7407546705247235,
+      "diffuse_rejection_db": 5.862890590522733
+    },
+    {
+      "name": "Shout_COOEE",
+      "drone": "Intel Aero",
+      "seconds": 65.7,
+      "files": 2,
+      "tonal_share": 0.012196221854537725,
+      "spatial_rank4": 0.7530665695667267,
+      "learned_rejection_db": 6.03729606060296,
+      "diffuse_rank4": null,
+      "diffuse_rejection_db": null
+    }
+  ],
+  "k_spatial": 4,
+  "band_hz": [
+    300.0,
+    4000.0
+  ],
+  "white_noise_reference": {
+    "spatial_rank4": 0.5,
+    "learned_rejection_db": 3.010299956639812
+  }
+}

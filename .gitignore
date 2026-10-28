@@ -1,0 +1,31 @@
+# Datasets are downloaded separately (see README) and never committed
+data/*
+!data/README.md
+
+# Generated audio (derived from DREGON recordings)
+results/audio/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# LaTeX build files
+papers/*/*.aux
+papers/*/*.bbl
+papers/*/*.blg
+papers/*/*.log
+papers/*/*.out
+papers/*/*.synctex.gz
+papers/*/*.fdb_latexmk
+papers/*/*.fls
+papers/*/*.brf
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

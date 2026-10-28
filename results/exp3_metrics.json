@@ -1,0 +1,232 @@
+{
+  "frame_alignment": {
+    "median_err": 2.9999999999998623,
+    "offset": 90,
+    "az_sign": 1,
+    "el_sign": 1
+  },
+  "by_snr": {
+    "0": {
+      "A_SRP-PHAT": {
+        "n": 48,
+        "median_deg": 2.9999999999998623,
+        "mean_deg": 2.374999999999931,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      },
+      "B_SRP-PHAT+RPMmask": {
+        "n": 48,
+        "median_deg": 1.448877649636326,
+        "mean_deg": 1.9289796082726978,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      },
+      "C_MUSIC": {
+        "n": 48,
+        "median_deg": 2.9999999999998015,
+        "mean_deg": 1.6874999999999467,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 48,
+        "median_deg": 0.0,
+        "mean_deg": 1.478072456612397,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      },
+      "E_GEVD-MUSIC_rpmNCM": {
+        "n": 48,
+        "median_deg": 0.0,
+        "mean_deg": 1.4366793424592899,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      }
+    },
+    "-5": {
+      "A_SRP-PHAT": {
+        "n": 48,
+        "median_deg": 2.999999999999923,
+        "mean_deg": 4.888031929536219,
+        "acc@10deg": 0.9791666666666666,
+        "acc@20deg": 0.9791666666666666
+      },
+      "B_SRP-PHAT+RPMmask": {
+        "n": 48,
+        "median_deg": 2.897755299272652,
+        "mean_deg": 2.141149478587485,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      },
+      "C_MUSIC": {
+        "n": 48,
+        "median_deg": 2.999999999999923,
+        "mean_deg": 4.210804458714121,
+        "acc@10deg": 0.9791666666666666,
+        "acc@20deg": 0.9791666666666666
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 48,
+        "median_deg": 0.0,
+        "mean_deg": 1.5819655707654983,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      },
+      "E_GEVD-MUSIC_rpmNCM": {
+        "n": 48,
+        "median_deg": 1.4999999999999007,
+        "mean_deg": 1.7280724566123908,
+        "acc@10deg": 1.0,
+        "acc@20deg": 1.0
+      }
+    },
+    "-10": {
+      "A_SRP-PHAT": {
+        "n": 48,
+        "median_deg": 71.67715985986956,
+        "mean_deg": 59.91387731684716,
+        "acc@10deg": 0.3958333333333333,
+        "acc@20deg": 0.3958333333333333
+      },
+      "B_SRP-PHAT+RPMmask": {
+        "n": 48,
+        "median_deg": 64.50525153473801,
+        "mean_deg": 51.453649983755305,
+        "acc@10deg": 0.4583333333333333,
+        "acc@20deg": 0.4583333333333333
+      },
+      "C_MUSIC": {
+        "n": 48,
+        "median_deg": 67.00891276121185,
+        "mean_deg": 51.75600583337981,
+        "acc@10deg": 0.4583333333333333,
+        "acc@20deg": 0.4583333333333333
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 48,
+        "median_deg": 2.999999999999923,
+        "mean_deg": 11.349688642890698,
+        "acc@10deg": 0.8958333333333334,
+        "acc@20deg": 0.8958333333333334
+      },
+      "E_GEVD-MUSIC_rpmNCM": {
+        "n": 48,
+        "median_deg": 2.999999999999923,
+        "mean_deg": 12.053885672737655,
+        "acc@10deg": 0.8958333333333334,
+        "acc@20deg": 0.8958333333333334
+      }
+    },
+    "-15": {
+      "A_SRP-PHAT": {
+        "n": 48,
+        "median_deg": 91.88743998218087,
+        "mean_deg": 94.4118302264435,
+        "acc@10deg": 0.020833333333333332,
+        "acc@20deg": 0.020833333333333332
+      },
+      "B_SRP-PHAT+RPMmask": {
+        "n": 48,
+        "median_deg": 85.62666303078566,
+        "mean_deg": 90.70477980868668,
+        "acc@10deg": 0.020833333333333332,
+        "acc@20deg": 0.020833333333333332
+      },
+      "C_MUSIC": {
+        "n": 48,
+        "median_deg": 91.68795783085105,
+        "mean_deg": 94.4409022296308,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 48,
+        "median_deg": 81.50946990607589,
+        "mean_deg": 68.38121187345,
+        "acc@10deg": 0.2916666666666667,
+        "acc@20deg": 0.2916666666666667
+      },
+      "E_GEVD-MUSIC_rpmNCM": {
+        "n": 48,
+        "median_deg": 75.52002125536126,
+        "mean_deg": 62.93940506768079,
+        "acc@10deg": 0.3541666666666667,
+        "acc@20deg": 0.3541666666666667
+      }
+    },
+    "-20": {
+      "A_SRP-PHAT": {
+        "n": 48,
+        "median_deg": 91.62823529419896,
+        "mean_deg": 94.34755030345235,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      },
+      "B_SRP-PHAT+RPMmask": {
+        "n": 48,
+        "median_deg": 94.17513887147567,
+        "mean_deg": 95.25064567696722,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      },
+      "C_MUSIC": {
+        "n": 48,
+        "median_deg": 91.68795783085105,
+        "mean_deg": 94.93368225111881,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 48,
+        "median_deg": 89.82099639200248,
+        "mean_deg": 93.4341412644743,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      },
+      "E_GEVD-MUSIC_rpmNCM": {
+        "n": 48,
+        "median_deg": 85.16090201726865,
+        "mean_deg": 92.80295275420148,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      }
+    },
+    "-25": {
+      "A_SRP-PHAT": {
+        "n": 48,
+        "median_deg": 91.62823529419896,
+        "mean_deg": 93.80100273272093,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      },
+      "B_SRP-PHAT+RPMmask": {
+        "n": 48,
+        "median_deg": 91.84969533141766,
+        "mean_deg": 93.29082008466703,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      },
+      "C_MUSIC": {
+        "n": 48,
+        "median_deg": 91.68795783085105,
+        "mean_deg": 94.19747361739822,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 48,
+        "median_deg": 89.79290838725436,
+        "mean_deg": 92.44870873164182,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      },
+      "E_GEVD-MUSIC_rpmNCM": {
+        "n": 48,
+        "median_deg": 86.18745709899142,
+        "mean_deg": 94.62445313007697,
+        "acc@10deg": 0.0,
+        "acc@20deg": 0.0
+      }
+    }
+  }
+}

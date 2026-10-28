@@ -1,0 +1,122 @@
+{
+  "frame_alignment": {
+    "median_err": 2.5332986994405142,
+    "offset": 93,
+    "az_sign": 1,
+    "el_sign": 1,
+    "source": "DREGON_silent-flight_whitenoise-low_room1"
+  },
+  "per_flight": {
+    "DREGON_free-flight_whitenoise-high_room1": {
+      "A_SRP-PHAT": {
+        "n": 191,
+        "median_deg": 59.29098333166054,
+        "mean_deg": 53.48458959696287,
+        "acc@10deg": 0.3612565445026178,
+        "acc@20deg": 0.4031413612565445
+      },
+      "B_SRP-PHAT+RPMmask": {
+        "n": 191,
+        "median_deg": 6.607648559631915,
+        "mean_deg": 35.332699535628045,
+        "acc@10deg": 0.5863874345549738,
+        "acc@20deg": 0.6387434554973822
+      },
+      "C_MUSIC": {
+        "n": 191,
+        "median_deg": 37.583752968269245,
+        "mean_deg": 46.37074713874667,
+        "acc@10deg": 0.44502617801047123,
+        "acc@20deg": 0.4712041884816754
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 191,
+        "median_deg": 4.245415976930485,
+        "mean_deg": 18.637068147139495,
+        "acc@10deg": 0.7486910994764397,
+        "acc@20deg": 0.7853403141361257
+      },
+      "E_GEVD-MUSIC_rpmNCM": {
+        "n": 191,
+        "median_deg": 4.567483648986077,
+        "mean_deg": 16.388020536714933,
+        "acc@10deg": 0.7591623036649214,
+        "acc@20deg": 0.8219895287958116
+      }
+    },
+    "DREGON_free-flight_whitenoise-low_room1": {
+      "A_SRP-PHAT": {
+        "n": 200,
+        "median_deg": 80.85910976766974,
+        "mean_deg": 91.00955416294481,
+        "acc@10deg": 0.015,
+        "acc@20deg": 0.015
+      },
+      "B_SRP-PHAT+RPMmask": {
+        "n": 200,
+        "median_deg": 79.58180001988475,
+        "mean_deg": 82.49022045296141,
+        "acc@10deg": 0.085,
+        "acc@20deg": 0.09
+      },
+      "C_MUSIC": {
+        "n": 200,
+        "median_deg": 77.58931901001472,
+        "mean_deg": 87.47744487983513,
+        "acc@10deg": 0.03,
+        "acc@20deg": 0.045
+      },
+      "D_GEVD-MUSIC_globalNCM": {
+        "n": 200,
+        "median_deg": 30.782427039698526,
+        "mean_deg": 43.50391283166556,
+        "acc@10deg": 0.465,
+        "acc@20deg": 0.485
+      },
+      "E_GEVD-MUSIC_rpmNCM": {
+        "n": 200,
+        "median_deg": 5.370675785183856,
+        "mean_deg": 28.7145078800405,
+        "acc@10deg": 0.64,
+        "acc@20deg": 0.665
+      }
+    }
+  },
+  "overall": {
+    "A_SRP-PHAT": {
+      "n": 391,
+      "median_deg": 76.68805267833638,
+      "mean_deg": 72.67894487367998,
+      "acc@10deg": 0.18414322250639387,
+      "acc@20deg": 0.20460358056265984
+    },
+    "B_SRP-PHAT+RPMmask": {
+      "n": 391,
+      "median_deg": 67.32001863907395,
+      "mean_deg": 59.45419361099038,
+      "acc@10deg": 0.329923273657289,
+      "acc@20deg": 0.35805626598465473
+    },
+    "C_MUSIC": {
+      "n": 391,
+      "median_deg": 72.3866496654681,
+      "mean_deg": 67.39719099608092,
+      "acc@10deg": 0.23273657289002558,
+      "acc@20deg": 0.2531969309462916
+    },
+    "D_GEVD-MUSIC_globalNCM": {
+      "n": 391,
+      "median_deg": 6.123408965963209,
+      "mean_deg": 31.35668179651344,
+      "acc@10deg": 0.6035805626598465,
+      "acc@20deg": 0.6317135549872123
+    },
+    "E_GEVD-MUSIC_rpmNCM": {
+      "n": 391,
+      "median_deg": 5.041400024784726,
+      "mean_deg": 22.693129152226735,
+      "acc@10deg": 0.6982097186700768,
+      "acc@20deg": 0.7416879795396419
+    }
+  }
+}

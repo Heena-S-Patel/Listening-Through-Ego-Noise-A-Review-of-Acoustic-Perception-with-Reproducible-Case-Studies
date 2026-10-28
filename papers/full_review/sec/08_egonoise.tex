@@ -1,0 +1,62 @@
+\section{Ego-Noise: The Defining Problem}
+\label{sec:egonoise}
+
+Ego-noise is the sound a platform makes itself.
+It differs from the interference that room acoustics and audio benchmarks assume in four ways.
+It is \emph{loud}: on drones, targets are routinely recorded at strongly negative SNR~\cite{strauss2018dregon,deleforge2019spcup,ruizespitia2018aira}, and in our drone case study localization breaks down between $-10$ and $-20$\,dB (\cref{sec:case-dregon}).
+It is \emph{close and fixed}: its sources sit at known places on the body, so it has strong spatial structure, and drone ego-noise is highly correlated across microphones~\cite{ruizespitia2018aira}.
+It is \emph{non-stationary}: it changes with every gesture, maneuver or acceleration.
+And it is \emph{partly predictable}, because the platform knows its own motor and joint state.
+The last property is what an autonomous platform has that a static device does not, and the most effective methods exploit it.
+
+\paragraph{Structure of rotor and motor noise.}
+A rotor turning at $f_0$ revolutions per second produces tones at multiples of $f_0$, strongest at multiples of the blade passing frequency $B f_0$ for $B$ blades, plus broadband aerodynamic noise; both shift with speed~\cite{yen2023ncm}.
+Robot joint motors produce harmonic noise whose structure follows motor speed~\cite{schmidt2018egonoise}.
+Our case studies confirm and qualify both points on real drone data: predicted rotor tones follow the measured motor speed closely, yet on most drones the noise is largely broadband, and the share of energy in tones ranges from 1\% to 70\% across five drones (\cref{sec:case-drones}), so frequency-domain masking alone cannot remove it.
+
+\paragraph{A taxonomy of suppression methods.}
+We group ego-noise methods by the information they exploit (\cref{tab:egonoise}).
+
+\emph{(i) Spatial noise models.}
+Because ego-noise sources are fixed relative to the array, their spatial covariance $\mathbf{R}_n(f)$ can be learned from noise-only recordings and used to whiten the observations, as in GEVD-MUSIC~\cite{nakamura2011gevd,okutani2012quadrocopter} or MVDR (\cref{eq:mvdr}).
+Furukawa \etal estimated the noise correlation matrix for a multirotor drone and showed that it improves localization~\cite{furukawa2013ncm}.
+
+\emph{(ii) State-informed models.}
+The platform's own state predicts its noise.
+On robots, template subtraction selects a pre-recorded noise template from the current joint status~\cite{ince2009template}, and motor data can guide or regularize multichannel dictionaries of ego-noise~\cite{schmidt2016dictionary,schmidt2018egonoise,schmidt2019informed}.
+On drones, rotor-noise-aware covariance estimation combines a multi-sensory estimate of rotor noise power with a model of the acoustic paths from rotors to microphones, and reports up to about 28\,dB rotor-noise reduction on in-flight recordings~\cite{yen2023ncm}.
+
+\emph{(iii) Learned suppression.}
+Neural networks estimate time-frequency masks that remove ego-noise before localization~\cite{wang2022drone}, in the spirit of mask-based beamforming~\cite{heymann2016mask}, or are conditioned directly on rotor speed for end-to-end enhancement~\cite{gulli2025rotor}.
+These methods can capture non-linear structure that covariance models miss, but they need training data from the same platform.
+
+\emph{(iv) Reference sensors.}
+Accelerometers or other vibration sensors close to the noise sources can, in principle, provide a reference signal with phase, which would allow tones to be subtracted rather than masked.
+This direction is largely open for autonomous platforms; flight-controller IMUs are usually logged at rates too low to capture the acoustic band (\cref{sec:case-dregon}).
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}L{1.75cm}L{2.15cm}L{1.65cm}L{1.9cm}@{}}
+\toprule
+Approach & Information used & Platforms & Refs \\
+\midrule
+Spatial noise model & noise-only recordings & robots, drones & \cite{nakamura2011gevd,okutani2012quadrocopter,furukawa2013ncm} \\
+State-informed & joint or motor state & robots, drones & \cite{ince2009template,schmidt2016dictionary,schmidt2018egonoise,schmidt2019informed,yen2023ncm} \\
+Learned & paired training data & drones & \cite{wang2022drone,gulli2025rotor} \\
+Reference sensors & vibration with phase & open & -- \\
+\bottomrule
+\end{tabular}
+\caption{Ego-noise suppression grouped by the information it exploits. Methods further down use more platform-specific information and need more platform-specific data.}
+\label{tab:egonoise}
+\end{table}
+
+\paragraph{Vehicles.}
+Ego-noise on road vehicles is less studied in the perception literature.
+Engine and tire noise are partly predictable from vehicle speed and engine state, and wind noise grows with speed; the occluded-vehicle detector of Schulz \etal reports its headline accuracy with a static ego-vehicle~\cite{schulz2021hearing}.
+Transferring state-informed ego-noise models from robots and drones to vehicles is a clear gap.
+
+\paragraph{Real-time constraints.}
+Ego-noise suppression must run on the platform.
+Only three of 49 drone localization studies in a recent systematic review ran in real time on board~\cite{chevtchenko2025review}, which makes efficient methods~\cite{grondin2019lightweight,grondin2022odas} as important as accurate ones.

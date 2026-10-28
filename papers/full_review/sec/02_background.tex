@@ -1,0 +1,35 @@
+\section{Background and Problem Formulation}
+\label{sec:background}
+
+\paragraph{Signal model.}
+An array of $M$ microphones at positions $\mathbf{r}_1,\dots,\mathbf{r}_M$ observes, in the short-time Fourier transform (STFT) domain,
+\begin{equation}
+\mathbf{x}(f,t) = \sum_{k=1}^{K} \mathbf{a}(f,\mathbf{u}_k)\, s_k(f,t) + \mathbf{n}_{\text{ego}}(f,t) + \mathbf{n}_{\text{env}}(f,t),
+\label{eq:model}
+\end{equation}
+where $s_k$ are $K$ target sources, $\mathbf{n}_{\text{ego}}$ is the noise the platform makes itself, and $\mathbf{n}_{\text{env}}$ is environmental noise and reverberation.
+For a far-field source from unit direction $\mathbf{u}$, the steering vector is
+\begin{equation}
+\mathbf{a}(f,\mathbf{u}) = \big[e^{\,j2\pi f\,\mathbf{r}_1^{\top}\mathbf{u}/c},\dots,e^{\,j2\pi f\,\mathbf{r}_M^{\top}\mathbf{u}/c}\big]^{\top},
+\label{eq:steer}
+\end{equation}
+with $c$ the speed of sound.
+Spatial covariances $\mathbf{R}_x(f)=\mathbb{E}[\mathbf{x}\mathbf{x}^{H}]$ and $\mathbf{R}_n(f)$ for the noise summarize the second-order statistics that most classical methods use.
+
+\paragraph{What makes autonomous platforms different.}
+Three properties of \cref{eq:model} distinguish autonomous platforms from static devices.
+First, $\mathbf{n}_{\text{ego}}$ is often the dominant term, so the signal-to-noise ratio (SNR) at the microphones is strongly negative~\cite{strauss2018dregon,ruizespitia2018aira}.
+Second, the array moves, so $\mathbf{u}_k$ changes over time even for static sources, and reverberation changes as the platform moves through a space.
+Third, $\mathbf{n}_{\text{ego}}$ is a function of the platform's own state, such as rotor speeds or joint velocities, which the platform knows.
+
+\paragraph{Binaural hearing.}
+Two-microphone robots, such as humanoid heads, rely on interaural time and level differences, as human hearing does.
+They suffer from front-back ambiguity, which head movement can resolve~\cite{ma2017binaural}; this was one of the original motivations for active audition~\cite{nakadai2000active}.
+
+\paragraph{Tasks.}
+We use the following task definitions.
+\emph{Localization} estimates the direction (and sometimes distance) of each source; \emph{tracking} links estimates over time.
+\emph{Sound event detection} (SED) estimates which classes are active and when~\cite{mesaros2021tutorial}.
+\emph{Separation and enhancement} recover the target signals $s_k$.
+\emph{Sound event localization and detection} (SELD) estimates class, activity and direction jointly~\cite{adavanne2019seld}.
+\emph{Acoustic mapping} recovers the positions of sources, of the platform, or of the surrounding geometry.

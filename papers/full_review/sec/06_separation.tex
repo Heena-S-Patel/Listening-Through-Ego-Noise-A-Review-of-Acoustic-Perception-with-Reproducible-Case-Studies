@@ -1,0 +1,31 @@
+\section{Separation, Enhancement and Speech}
+\label{sec:sep}
+
+Separation recovers the target signal itself, for recognition or for a human operator.
+
+\paragraph{Spatial filtering.}
+The minimum variance distortionless response (MVDR) beamformer~\cite{capon1969mvdr} keeps the target direction undistorted and minimizes everything else:
+\begin{equation}
+\mathbf{w}_{\text{MVDR}}(f)=\frac{\mathbf{R}_n^{-1}(f)\,\mathbf{a}(f,\mathbf{u})}{\mathbf{a}^{H}(f,\mathbf{u})\,\mathbf{R}_n^{-1}(f)\,\mathbf{a}(f,\mathbf{u})}.
+\label{eq:mvdr}
+\end{equation}
+Like GEVD-MUSIC (\cref{eq:gevd}), it needs the noise covariance $\mathbf{R}_n$, which is exactly what an ego-noise model provides.
+Neural mask estimation made such beamformers practical without explicit noise recordings: a network estimates time-frequency masks for speech and noise, which yield the covariances that define the beamformer~\cite{heymann2016mask}.
+
+\paragraph{Learned separation.}
+Supervised separation with deep networks covers speech enhancement, multi-talker separation and dereverberation~\cite{wang2018overview}.
+Conv-TasNet works directly on waveforms and surpassed ideal time-frequency masks on speech separation~\cite{luo2019convtasnet}.
+Separation quality is now usually reported as scale-invariant signal-to-distortion ratio (SI-SDR), introduced because the earlier SDR could be misleading~\cite{leroux2019sisdr}.
+
+\paragraph{Audio-visual separation.}
+Vision tells a separator which source to extract.
+The Sound of Pixels separates sources by the image regions that produce them~\cite{zhao2018pixels}; multisensory features learned from synchronization separate on-screen from off-screen sound~\cite{owens2018multisensory}; Looking to Listen isolates a chosen speaker from a crowd using the speaker's face~\cite{ephrat2018looking}; and audio-visual object embeddings learned without labels support separation, localization and active-speaker detection~\cite{afouras2020avobjects}.
+An agent can also move to improve separation: Move2Hear learns camera and microphone motion that maximizes predicted separation quality~\cite{majumder2021move2hear}.
+
+\paragraph{On drones.}
+Drone speech enhancement must cope with ego-noise far louder than speech.
+Neural masks estimated by a single-channel network suppress ego-noise before spatial processing~\cite{wang2022drone}; audio-visual recordings from a quadcopter provide baselines for localization and enhancement~\cite{wang2019avq}; and conditioning end-to-end enhancement networks on rotor speed improves speech recovery~\cite{gulli2025rotor}.
+
+\paragraph{Speech recognition.}
+For human-robot interaction, enhancement is usually followed by recognition.
+Large weakly supervised models such as Whisper, trained on 680{,}000 hours of transcribed audio, generalize zero-shot to many conditions~\cite{radford2023whisper}, but their robustness to strong ego-noise has not been characterized.

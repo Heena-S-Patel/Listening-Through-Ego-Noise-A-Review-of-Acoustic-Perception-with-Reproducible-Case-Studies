@@ -1,0 +1,45 @@
+\section{Datasets, Simulators and Toolkits}
+\label{sec:datasets}
+
+Progress in acoustic perception for autonomous systems is limited less by models than by data recorded on real platforms.
+\Cref{tab:datasets} lists the main public resources and what each can test.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}L{3.1cm}L{2.0cm}L{1.3cm}L{1.4cm}L{7.6cm}@{}}
+\toprule
+Resource & Platform & Real ego-noise & Ground truth & What it tests \\
+\midrule
+DREGON~\cite{strauss2018dregon} & drone, 8 mics & yes & motion capture & in-flight localization; per-rotor speed and IMU logged \\
+SP Cup 2019~\cite{deleforge2019spcup} & drone & yes & yes & localization for search and rescue \\
+SP Cup ego-noise~\cite{deleforge2019spcup} & 10 drones, 1--16 mics & yes & -- & ego-noise of different drones; used in \cref{sec:case} \\
+AIRA-UAS~\cite{ruizespitia2018aira} & drone & yes & -- & ego-noise during maneuvers and from nearby drones \\
+AVQ~\cite{wang2019avq} & drone, 8 mics + camera & yes & from video & audio-visual localization, tracking and enhancement outdoors \\
+LOCATA~\cite{lollmann2018locata,evers2020locata} & robot head (12 mics), spherical, planar, hearing aids; static and moving & no & motion capture & localization and tracking of moving talkers in a reverberant room; used in \cref{sec:case} \\
+OVAD~\cite{schulz2021hearing} & vehicle, 56 mics & partly & yes & detection of occluded vehicles \\
+STARSS23~\cite{shimada2023starss23} & static array + 360$^\circ$ video & no & motion capture & audio-visual SELD in real rooms \\
+AudioSet~\cite{gemmeke2017audioset} & web video & no & labels & event classification and pretraining \\
+ESC-50~\cite{piczak2015esc} & curated clips & no & labels & environmental sound classification \\
+FSD50K~\cite{fonseca2022fsd50k} & curated clips & no & labels & open event classification \\
+VGGSound~\cite{chen2020vggsound} & web video & no & labels & audio-visual recognition \\
+\midrule
+SoundSpaces~\cite{chen2020soundspaces,chen2022soundspaces2} & simulator & no & exact & audio-visual navigation and rendering \\
+Sonicverse~\cite{gao2023sonicverse} & simulator & no & exact & multisensory household agents \\
+ObjectFolder~\cite{gao2021objectfolder} & object models & no & exact & visual, auditory and tactile object properties \\
+\midrule
+HARK~\cite{nakadai2017hark} & toolkit & -- & -- & robot localization, separation, recognition \\
+ODAS~\cite{grondin2022odas} & toolkit & -- & -- & embedded localization, tracking, separation \\
+\bottomrule
+\end{tabular}
+\caption{Public datasets, simulators and toolkits. Only DREGON combines real ego-noise with the platform's own motor state and ground-truth directions; none yet combines a moving platform, real ego-noise, platform state, high-rate vibration sensing, multiple sound classes and video.}
+\label{tab:datasets}
+\end{table*}
+
+Three gaps stand out.
+First, the benchmarks with rich annotations (STARSS23 for SELD, SoundSpaces for navigation, AudioSet for classification) do not include ego-noise, while the datasets that do (DREGON, AIRA-UAS, AVQ) are small and focus on localization and enhancement.
+Second, no public benchmark yet combines a moving platform, real ego-noise, the platform's state, high-rate vibration sensing, multiple sound classes and visual input.
+Such a benchmark would let the embodied-learning and robot-audition communities measure progress on the same problem.
+Third, availability is fragile: of the ten drone ego-noise sets released with the SP Cup, two could no longer be downloaded at the time of writing, so archival hosting with persistent identifiers matters as much as collection.
+Toolkits such as HARK and ODAS lower the barrier to real-time deployment, but they implement classical pipelines and would benefit from integration with learned models.

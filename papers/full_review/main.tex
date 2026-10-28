@@ -1,0 +1,56 @@
+% CVPR 2026 Paper Template; see https://github.com/cvpr-org/author-kit
+% Full-length review: built in the template's arXiv mode (page numbers, authors shown).
+% For a CVPR submission, switch to [review] and condense to 8 pages.
+
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+%%%%%%%%% PAPER TYPE
+% \usepackage{cvpr}              % To produce the CAMERA-READY version
+% \usepackage[review]{cvpr}      % To produce the REVIEW version
+\usepackage[pagenumbers]{cvpr} % arXiv version with page numbers
+
+% Import additional packages in the preamble file, before hyperref
+\input{preamble}
+
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+
+\def\paperID{*****}
+\def\confName{CVPR}
+\def\confYear{2026}
+
+%%%%%%%%% TITLE
+\title{Hearing on the Move: A Review of Acoustic Perception\\for Autonomous Intelligent Systems}
+
+%%%%%%%%% AUTHORS
+\author{Heena Patel\\
+Cyber-Physical Systems Laboratory, Department of ICT and Natural Sciences\\
+NTNU - Norwegian University of Science and Technology, \AA{}lesund, Norway\\
+{\tt\small heena.s.patel@ntnu.no}
+}
+
+\begin{document}
+\maketitle
+\input{sec/00_abstract}
+\input{sec/01_intro}
+\input{sec/02_background}
+\input{sec/03_platforms}
+\input{sec/04_localization}
+\input{sec/05_detection}
+\input{sec/06_separation}
+\input{sec/07_seld}
+\input{sec/08_egonoise}
+\input{sec/09_geometry}
+\input{sec/10_embodied}
+\input{sec/11_datasets}
+\input{sec/12_metrics}
+\input{sec/13_case_study}
+\input{sec/14_challenges}
+\input{sec/15_conclusion}
+{
+    \small
+    \bibliographystyle{ieeenat_fullname}
+    \bibliography{main}
+}
+
+\end{document}

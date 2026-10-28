@@ -1,0 +1,6 @@
+# Tested with Python 3.12, numpy 2.5.4, scipy 1.18.1, matplotlib 3.11.2, soundfile 0.14.0, h5py 3.16.0
+numpy>=1.23
+scipy>=1.11        # spearmanr(...).statistic
+matplotlib>=3.10   # boxplot(orientation=...)
+soundfile>=0.12
+h5py>=3.8

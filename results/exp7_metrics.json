@@ -1,0 +1,43 @@
+{
+  "windows": 50,
+  "mean_rotor_speed_rps": 80.6235002311814,
+  "jitter_std_rps": {
+    "median": 0.9580298710314012,
+    "q1": 0.8563676906718214,
+    "q3": 1.1720346371382244,
+    "max": 3.9367187480457035
+  },
+  "between_rotor_spread_rps_median": 5.24506772640407,
+  "spearman_jitter": {
+    "rho": -0.3380072028811525,
+    "p": 0.016361543963245597
+  },
+  "spearman_spread": {
+    "rho": -0.15255702280912364,
+    "p": 0.29020914820932153
+  },
+  "tonal_share_calmest_quarter": 0.2161040036724164,
+  "tonal_share_most_jittery_quarter": 0.12892781922486252,
+  "mean_speed_calmest_quarter_rps": 80.68520177714309,
+  "mean_speed_most_jittery_quarter_rps": 80.77011453770449,
+  "chunk_length": [
+    {
+      "chunk_s": 1.0,
+      "dregon": 0.1565457135438919,
+      "white_8ch": 0.0,
+      "white_1ch": 0.0
+    },
+    {
+      "chunk_s": 0.5,
+      "dregon": 0.18540231883525848,
+      "white_8ch": 0.0,
+      "white_1ch": 0.0019678361366237207
+    },
+    {
+      "chunk_s": 0.25,
+      "dregon": 0.2938230633735657,
+      "white_8ch": 0.0,
+      "white_1ch": 0.22153437838226936
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+Acoustic perception gives autonomous systems a sense that reaches around corners and through occlusion, and the methods to exploit it, from array processing to large pretrained, audio-visual and language-grounded models, are increasingly mature.
+What holds hearing back on real platforms is the platform itself.
+This review has argued that ego-noise is the defining problem of the field, and that the platform's own knowledge of its state is the key to solving it.
+Across robots and drones, methods that model ego-noise explicitly and use motor or joint data outperform those that treat it as generic interference when ego-noise dominates.
+Our case studies on three public datasets quantify this: the advantage is largest exactly when the target is quietest, spatial noise models remove 6 to 13\,dB of ego-noise on all five drones studied, the value of tone-based methods varies widely between drones and flight conditions, and a noise model costs accuracy where there is little structured noise to remove.
+Closing the remaining gap will require bringing together three communities that have so far worked largely apart: robot and drone audition, which understands ego-noise; audio machine learning, which provides robust representations; and embodied vision and learning, which provides the tasks, simulators and benchmarks that turn hearing into action.

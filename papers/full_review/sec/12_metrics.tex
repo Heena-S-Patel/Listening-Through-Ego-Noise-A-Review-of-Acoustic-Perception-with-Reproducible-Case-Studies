@@ -1,0 +1,34 @@
+\section{Evaluation Protocols and Metrics}
+\label{sec:metrics}
+
+Results across the field are hard to compare because tasks, metrics and test conditions vary.
+\Cref{tab:metrics} lists the metrics in common use.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.6pt}
+\begin{tabular}{@{}L{1.6cm}L{4.25cm}L{1.55cm}@{}}
+\toprule
+Task & Metrics & Refs \\
+\midrule
+Localization & angular error (mean, median); accuracy within a threshold, \eg $10^\circ$ & \cite{evers2020locata,grumiaux2022survey} \\
+Tracking & localization metrics over time; track continuity and swaps & \cite{evers2020locata} \\
+Event detection & segment- or event-based F-score and error rate & \cite{mesaros2021tutorial} \\
+SELD & location-aware detection plus class-aware localization error & \cite{politis2021dcase} \\
+Separation & SI-SDR & \cite{leroux2019sisdr} \\
+Speech & word error rate & \cite{radford2023whisper} \\
+Navigation & success rate; success weighted by path length & \cite{chen2020soundspaces} \\
+\bottomrule
+\end{tabular}
+\caption{Common evaluation metrics by task.}
+\label{tab:metrics}
+\end{table}
+
+\paragraph{Recommendations.}
+Five practices would make results on autonomous platforms more comparable.
+\emph{(i) Report SNR at the microphones}, measured or controlled, rather than only the source level; performance on drones depends far more on SNR than on method details (\cref{sec:case-dregon}).
+\emph{(ii) Separate noise-model data from test data}: when a method learns an ego-noise model, it should be learned from recordings disjoint from the test signals, as in the held-out protocol of our drone case study (\cref{sec:case-dregon}).
+\emph{(iii) Fix frame alignment independently of the methods compared}: array and ground-truth frames should be aligned once, on separate data, with a method not under test.
+\emph{(iv) Report per-condition results}, such as per flight or per SNR, since averages can hide where a method helps most; in our drone case study the benefit of motor-speed information is concentrated in the quiet-source condition.
+\emph{(v) Report a baseline without a noise model and the noise conditions}, because a noise model can also cost accuracy when the SNR is high and the noise close to diffuse, as on the robot-head array of \cref{sec:case-locata}.
