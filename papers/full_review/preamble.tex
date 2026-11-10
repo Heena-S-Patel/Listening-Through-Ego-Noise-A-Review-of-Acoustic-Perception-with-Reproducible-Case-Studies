@@ -85,6 +85,6 @@
 %% Reconfigure paragraph (tweaks spacing)
 %%
 
-% Text added after the peer review of the case studies is shown in blue.
-% To print it in black, change {blue} to {black} in the next line.
-\newcommand{\rev}[1]{{\color{blue}#1}}
+% Marks text added after the peer review of the case studies. It prints as normal text.
+% To show these additions in blue, use {{\color{blue}#1}} instead of {#1}.
+\newcommand{\rev}[1]{#1}
