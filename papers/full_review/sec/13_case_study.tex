@@ -1,49 +1,131 @@
 \section{Case Studies on Public Datasets}
 \label{sec:case}
 
-To test the argument of \cref{sec:egonoise} rather than assert it, we run three reproducible studies with established methods and one shared code base, on three public datasets.
+%To test the argument of \cref{sec:egonoise} rather than assert it, we run three reproducible studies with established methods and one shared code base, on three public datasets.
+\rev{To test the argument of \cref{sec:egonoise} rather than assert it, we run reproducible studies with established methods and one shared code base, on three public datasets (\cref{tab:casedata}).}
 \Cref{sec:case-dregon} measures how much an explicit noise model and motor-speed information help in-flight localization on one drone.
+\rev{\Cref{sec:case-agh} repeats this test with recorded speech on a second drone, which was held in place.}
 \Cref{sec:case-drones} asks whether the properties of ego-noise that make such models work hold across five different drones.
-\Cref{sec:case-locata} applies the same localizers to a robot-head array in a reverberant room without ego-noise, to see where a noise model stops helping.
-The code reproduces every number and figure in this section.
+%\Cref{sec:case-locata} applies the same localizers to a robot-head array in a reverberant room without ego-noise, to see where a noise model stops helping.
+\rev{\Cref{sec:case-locata} applies the same localizers to a robot-head array and a spherical array in a reverberant room at high SNR, to see where a noise model stops helping.}
+%The code reproduces every number and figure in this section.
+\rev{The code reproduces every number and figure in this section, and it is available at \url{https://github.com/Heena-S-Patel/Listening-Through-Ego-Noise-A-Review-of-Acoustic-Perception-with-Reproducible-Case-Studies}.
+We used Python 3.12, NumPy 2.5, SciPy 1.18 and random seed 0.}
+
+\begin{table*}[t]
+\color{blue}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Set & Platform & Mics (aperture) & Motor state & Ground truth \\
+\midrule
+DREGON & MK-Quadro, flying & 8 (17\,cm) & Rotor speeds & Motion capture \\
+SP Cup & DJI Phantom 4 Pro, flying & 8 (6\,cm) & None & Noise only \\
+SP Cup & MK Quadro V3, held & 8 (15\,cm) & None & Noise only \\
+SP Cup & Intel Aero, flying & 8 (unpublished) & None & Noise only \\
+SP Cup & Quadrotor (AGH), held & 8 (25\,cm, measured) & Throttle & Labeled directions \\
+LOCATA & Robot head & 12 (12\,cm) & None & Optical tracking \\
+LOCATA & Eigenmike & 32 (8.4\,cm) & None & Optical tracking \\
+\bottomrule
+\end{tabular}
+\caption{Datasets used in the case studies. DREGON and SP Cup recordings are sampled at 44.1\,kHz and LOCATA at 48\,kHz.}
+\label{tab:casedata}
+\end{table*}
 
 \subsection{In-flight localization on a drone (DREGON)}
 \label{sec:case-dregon}
 
 DREGON~\cite{strauss2018dregon} records an 8-microphone array on a quadrotor, together with each rotor's measured speed (logged at about 1\,kHz), the flight controller's IMU and the true source direction from motion capture.
 We use the noise-only flight to learn noise models, two free flights with a white-noise loudspeaker (391 windows of 0.5\,s) for evaluation, and the clean tripod recordings mixed with held-out flight noise for a controlled SNR sweep.
+\rev{The noise-only flight lasts 71\,s, of which about 60\,s have the motors running.}
 
 \paragraph{Setup.}
-We compare five localizers on a $3^\circ$ grid and a 300--4000\,Hz band: (A) SRP-PHAT~\cite{dibiase2000srp}; (B) SRP-PHAT with bins at predicted rotor harmonics removed, using the motor log; (C) MUSIC~\cite{schmidt1986music}; (D) GEVD-MUSIC (\cref{eq:gevd}) with a single noise covariance learned from the noise-only flight~\cite{nakamura2011gevd,furukawa2013ncm}; and (E) GEVD-MUSIC with six covariances binned by mean motor speed, a simple form of state-informed modeling~\cite{furukawa2013ncm,yen2023ncm}.
+%We compare five localizers on a $3^\circ$ grid and a 300--4000\,Hz band: (A) SRP-PHAT~\cite{dibiase2000srp}; (B) SRP-PHAT with bins at predicted rotor harmonics removed, using the motor log; (C) MUSIC~\cite{schmidt1986music}; (D) GEVD-MUSIC (\cref{eq:gevd}) with a single noise covariance learned from the noise-only flight~\cite{nakamura2011gevd,furukawa2013ncm}; and (E) GEVD-MUSIC with six covariances binned by mean motor speed, a simple form of state-informed modeling~\cite{furukawa2013ncm,yen2023ncm}.
+\rev{We compare six localizers on a $3^\circ$ grid of 7320 directions (120 azimuths and 61 elevations) and a 300--4000\,Hz band.
+(A) SRP-PHAT~\cite{dibiase2000srp}.
+(B) SRP-PHAT with tone masking, a simple baseline of our own.
+It removes the bins at the blade passing harmonics $2kf_0$ of each rotor, where $f_0$ is the shaft rate from the motor log, since rotor noise contains tones at these frequencies~\cite{christian2015auralization}.
+A bin is removed when it rises at least 3\,dB above the local spectral floor, and at most 40\% of the bins in the band are removed.
+(C) MUSIC~\cite{schmidt1986music}, with each narrowband pseudo-spectrum normalized by its maximum over directions so that no single bin dominates.
+(D) GEVD-MUSIC (\cref{eq:gevd}) with a single noise covariance learned from the noise-only flight~\cite{nakamura2011gevd,furukawa2013ncm}.
+Its diagonal loading is $10^{-3}$ times the mean noise power, and each generalized eigenvector is scaled to unit norm, since these vectors have no fixed scale.
+(E) GEVD-MUSIC with six covariances, one per quantile bin of mean motor speed, which is a simple form of state-informed modeling~\cite{furukawa2013ncm,yen2023ncm}.
+Each window uses the bin closest to the mean rotor speed logged at its center.
+(F) SRP-PHAT after a multichannel Wiener filter, which follows the best method of the DREGON paper~\cite{strauss2018dregon}.
+Each frame becomes $\hat{\mathbf{x}}=(\mathbf{R}_x-\mathbf{R}_n)\mathbf{R}_x^{-1}\mathbf{x}$, and the generalized eigenvalues of $(\mathbf{R}_x,\mathbf{R}_n)$ are first raised to at least one, which keeps the filter positive semidefinite.
+F uses the covariance of D, and F with speed bins uses those of E.
+All methods use a 1024-point STFT with 50\% overlap, except B, which uses 4096 points with 75\% overlap so that individual rotor tones are resolved.
+The subspace methods use every second frequency bin.}
 The array and motion-capture frames are aligned once, with method A only, on a separate flight with motors off (median error after alignment $2.5^\circ$).
+\rev{This alignment therefore cannot favor any of the compared methods.}
 The motor-speed unit is not documented by the dataset; aligning predicted rotor harmonics with the noise spectrum shows that the logged values are revolutions per second (best-fitting scale 0.997).
+\rev{Localization is scored by the angular error between the estimated and true directions, as the median and as the share of windows within $10^\circ$.
+Neighboring windows are correlated, so we report 95\% intervals from a circular block bootstrap with 5\,s blocks drawn within each flight, and test paired differences with a block sign-flip test.}
+
+\rev{These settings are not critical.
+With diagonal loading between $10^{-5}$ and $10^{-2}$, D stays at 59.8 to 60.4\% within $10^\circ$ and E at 68.0 to 70.1\%, whereas $10^{-1}$ lowers them to 53.5 and 55.5\%.
+Without the unit-norm scaling, D and E reach 54.7 and 59.3\%.
+For F, the matrix order printed in Eq.~2 of the DREGON paper gives 0.3\% on our flights, and our order without the eigenvalue limit gives 3.3\%.
+We chose the final form of F after seeing these results, so F may be slightly optimistic.}
 
 \paragraph{Localization in flight.}
-\Cref{tab:case} gives the headline numbers.
-Without a noise model (A, C) most windows are wrong by tens of degrees: the response peaks in the directions of the rotors, about $45^\circ$ above the array.
-Learning the noise covariance (D) reduces the median error from $77^\circ$ to $6^\circ$, and selecting it by motor speed (E) adds a further 9 points of accuracy.
-The benefit of motor speed is concentrated on the harder, quieter-source flight, where E reaches 64\% within $10^\circ$ against 47\% for D, and the median error falls from $31^\circ$ to $5^\circ$.
-Masking predicted rotor tones (B) helps the baseline but cannot rescue it, because much of the rotor noise is broadband.
-\Cref{fig:tracking} shows the difference over whole flights.
+%\Cref{tab:case} gives the headline numbers.
+%Without a noise model (A, C) most windows are wrong by tens of degrees: the response peaks in the directions of the rotors, about $45^\circ$ above the array.
+%Learning the noise covariance (D) reduces the median error from $77^\circ$ to $6^\circ$, and selecting it by motor speed (E) adds a further 9 points of accuracy.
+%The benefit of motor speed is concentrated on the harder, quieter-source flight, where E reaches 64\% within $10^\circ$ against 47\% for D, and the median error falls from $31^\circ$ to $5^\circ$.
+%Masking predicted rotor tones (B) helps the baseline but cannot rescue it, because much of the rotor noise is broadband.
+%\Cref{fig:tracking} shows the difference over whole flights.
+\rev{\Cref{tab:case} gives the results.
+Without a noise model (A, C), most windows are wrong by tens of degrees, since the response peaks on rotor noise arriving from about 45 to $50^\circ$ above the array.
+\Cref{fig:tracking} shows this over whole flights.
+Learning the noise covariance (D) reduces the median error from $76.7^\circ$ to $6.1^\circ$, a gain of 41.9 points [28.6, 54.7] within $10^\circ$.
+Selecting the covariance by motor speed (E) adds 9.5 points [4.9, 13.8] ($p=0.008$) and reduces the mean error from $31.4^\circ$ to $22.7^\circ$.
+This gain is concentrated on the quiet-source flight, where E reaches 64.0\% against 46.5\% for D, a gain of 17.5 points [9.5, 25.5].
+On the loud flight it is only 1.0 point [$-2.1$, 4.7].}
+
+%\begin{table}[t]
+%\centering
+%\footnotesize
+%\setlength{\tabcolsep}{2.4pt}
+%\begin{tabular}{@{}lcccc@{}}
+%\toprule
+% & \multicolumn{2}{c}{Both flights} & \multicolumn{2}{c}{Within $10^\circ$} \\
+%\cmidrule(lr){2-3}\cmidrule(l){4-5}
+%Method & Med. err. & ${\le}10^\circ$ & Loud & Quiet \\
+%\midrule
+%A\; SRP-PHAT & $76.7^\circ$ & 18.4\% & 36.1\% & 1.5\% \\
+%B\; + tone mask & $67.3^\circ$ & 33.0\% & 58.6\% & 8.5\% \\
+%C\; MUSIC & $72.4^\circ$ & 23.3\% & 44.5\% & 3.0\% \\
+%D\; GEVD, one noise model & $6.1^\circ$ & 60.4\% & 74.9\% & 46.5\% \\
+%E\; GEVD, speed-binned & $\mathbf{5.0^\circ}$ & \textbf{69.8\%} & \textbf{75.9\%} & \textbf{64.0\%} \\
+%\bottomrule
+%\end{tabular}
+%\caption{In-flight localization on DREGON, 391 windows of 0.5\,s scored against motion capture: median angular error and share of windows within $10^\circ$, over both flights and for the loud-source (191 windows) and quiet-source (200 windows) flights.}
+%\label{tab:case}
+%\end{table}
 
 \begin{table}[t]
 \centering
-\footnotesize
-\setlength{\tabcolsep}{2.4pt}
-\begin{tabular}{@{}lcccc@{}}
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{@{}lcccccc@{}}
 \toprule
- & \multicolumn{2}{c}{Both flights} & \multicolumn{2}{c}{Within $10^\circ$} \\
-\cmidrule(lr){2-3}\cmidrule(l){4-5}
-Method & Med. err. & ${\le}10^\circ$ & Loud & Quiet \\
+ & \multicolumn{2}{c}{Error} & \multicolumn{4}{c}{Within $10^\circ$} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-7}
+Method & Med. & Mean & All & 95\% CI & Loud & Quiet \\
 \midrule
-A\; SRP-PHAT & $76.7^\circ$ & 18.4\% & 36.1\% & 1.5\% \\
-B\; + tone mask & $67.3^\circ$ & 33.0\% & 58.6\% & 8.5\% \\
-C\; MUSIC & $72.4^\circ$ & 23.3\% & 44.5\% & 3.0\% \\
-D\; GEVD, one noise model & $6.1^\circ$ & 60.4\% & 74.9\% & 46.5\% \\
-E\; GEVD, speed-binned & $\mathbf{5.0^\circ}$ & \textbf{69.8\%} & \textbf{75.9\%} & \textbf{64.0\%} \\
+A\; SRP-PHAT & $76.7^\circ$ & $72.7^\circ$ & 18.4\% & [10.5, 26.9] & 36.1\% & 1.5\% \\
+B\; + tone mask & $67.3^\circ$ & $59.5^\circ$ & 33.0\% & [23.8, 42.5] & 58.6\% & 8.5\% \\
+C\; MUSIC & $72.4^\circ$ & $67.4^\circ$ & 23.3\% & [13.0, 34.3] & 44.5\% & 3.0\% \\
+D\; GEVD, one model & $6.1^\circ$ & $31.4^\circ$ & 60.4\% & [46.0, 73.7] & 74.9\% & 46.5\% \\
+E\; GEVD, speed bins & $5.0^\circ$ & $22.7^\circ$ & 69.8\% & [55.5, 82.6] & 75.9\% & 64.0\% \\
+\rev{F\; Wiener, one model} & \rev{$5.0^\circ$} & \rev{$24.0^\circ$} & \rev{71.4\%} & \rev{[59.6, 82.1]} & \rev{\textbf{79.1\%}} & \rev{64.0\%} \\
+\rev{F\; Wiener, speed bins} & \rev{$\mathbf{4.9^\circ}$} & \rev{$\mathbf{21.5^\circ}$} & \rev{\textbf{72.4\%}} & \rev{[60.1, 83.1]} & \rev{78.5\%} & \rev{\textbf{66.5\%}} \\
 \bottomrule
 \end{tabular}
-\caption{In-flight localization on DREGON, 391 windows of 0.5\,s scored against motion capture: median angular error and share of windows within $10^\circ$, over both flights and for the loud-source (191 windows) and quiet-source (200 windows) flights.}
+\caption{In-flight localization on DREGON, 391 windows of 0.5\,s scored against motion capture. Median and mean angular error, and share of windows within $10^\circ$ over both flights \rev{with its 95\% block-bootstrap interval}, and for the loud-source (191 windows) and quiet-source (200 windows) flights.}
 \label{tab:case}
 \end{table}
 
@@ -54,14 +136,135 @@ E\; GEVD, speed-binned & $\mathbf{5.0^\circ}$ & \textbf{69.8\%} & \textbf{75.9\%
 \label{fig:tracking}
 \end{figure*}
 
+\rev{\paragraph{How firm the gains are.}
+From the autocorrelation of the paired differences, the 391 windows count as about 282 independent windows for E against D and about 58 for D against A.
+Blocks of 2.5 and 10\,s give intervals of [5.4, 13.8] and [4.1, 14.6] for E over D.
+An exact McNemar test also favors E, which is correct in 40 windows where D fails and fails in 3 where D is correct ($p<10^{-8}$), but it treats the windows as independent, so we rely on the block intervals.
+Two flights are too few to use flights as the unit of a test, so each flight is reported separately, and the gain cannot be generalized to other flights.
+It also depends on the noise recording.
+When both models are learned on 35\,s spans at five places in the noise-only flight, D reaches 69.1\% on average (58.3 to 74.2\%) and E 72.0\% (67.5 to 73.1\%), so most of the gain disappears.
+Averaging one covariance over the whole flight therefore appears to penalize D.
+E reaches 64.2 to 69.8\% with 2 to 24 speed bins, and six bins give the highest value, so the 69.8\% may be slightly optimistic.
+Spans of 5, 10 and 20\,s give E 65.8\% (47.8 to 71.6\%), 68.5\% (58.1 to 73.9\%) and 70.7\% (62.9 to 73.7\%) at the same five places.
+Short spans are therefore usable on average, but a 5\,s span can fail badly.}
+
+\rev{\paragraph{Motor state or a better filter?}
+The Wiener filter (F) changes the reading of the motor state.
+With one covariance and no motor data, F reaches 71.4\% [59.6, 82.1], which is 52.9 points [42.2, 63.7] above A and 11.0 points [4.9, 17.6] above D ($p=0.009$).
+F does not differ measurably from E (1.5 points [$-4.6$, 8.2], $p=0.73$).
+Adding speed bins to F gives 72.4\%, a gain of only 1.0 point [$-1.3$, 3.3] ($p=0.58$), and 2.5 points [$-0.5$, 6.0] on the quiet flight.
+Much of the gain of E over D therefore reflects a weakness of one covariance in GEVD-MUSIC, and not information that only the motor state can provide.}
+
+\rev{\paragraph{Controls for flight.}
+Two controls separate the rotor noise from other effects of flight.
+On a motors-off recording of the moving array (252 windows, SNR about 32\,dB), A and F reach 96.4\%, whereas C and D reach only 62 to 64\%.
+C has a fixed elevation bias of $-5.1^\circ$ on this recording, and correcting it raises C to 97.6\%.
+Within $20^\circ$, all these methods reach 98 to 100\%.
+Refitting the frames with this bias changes C, D and E on the flights by at most 1.3 points (23.0, 59.1 and 68.8\%), so \cref{tab:case} does not depend on it.
+Mixing this recording with held-out flight noise tests motion at a controlled SNR.
+At $-10$\,dB, A, D, E and F reach 67.1, 73.8, 72.6 and 92.1\%, and at $-15$\,dB they reach 6.7, 37.3, 46.0 and 62.3\%.
+At $-15$\,dB, E leads D by 8.7 points [4.4, 13.1] ($p=0.003$) and F leads D by 25.0 points [17.5, 32.5], whereas speed bins lower F by 2.4 points [$-4.8$, $-0.4$].}
+
+\rev{\paragraph{Tone masking.}
+Masking rotor tones (B) raises the share of SRP-PHAT within $10^\circ$ from 18.4\% to 33.0\%, but two thirds of the windows still exceed $10^\circ$ of error.
+The reason is that much of the noise lies between the tones.
+In the 1 to 2\,kHz band, the predicted blade passing tones cover 24\% of the frequency bins but hold only 30\% of the noise energy.
+B uses a 4096-point STFT while A uses 1024 points.
+With a shared 1024-point STFT, B reaches only 21.2\%, so most of its gain over A comes from the finer STFT rather than from the mask.
+At 4096 points with 75\% overlap, as for B, A reaches 28.9\%, against 33.0\% for B (\cref{tab:ablation}).
+The DREGON paper does not state the blade count, so two blades remain an assumption.
+Its Fig.~3b shows one motor at 80 turns/s with noise peaks near 80, 160, 238 and 316\,Hz, with the strongest at 160\,Hz, which is consistent with two blades~\cite{strauss2018dregon}.
+Combs at one, two and three times the shaft rate give 35.3, 33.0 and 31.5\%, so B does not depend strongly on it.
+The 40\% cap on removed bins is never reached, since the mask removes 6.6\% of the bins on average and at most 17.7\% in any window.
+Tone masking and noise modeling can also be combined.
+Removing the masked bins before D and E gives 64.5 and 72.6\%, a gain of 4.1 [2.0, 6.4] and 2.8 [0.8, 5.1] points.}
+
+\rev{\paragraph{Analysis settings.}
+The original papers report each method with different analysis settings.
+\Cref{tab:ablation} therefore repeats the flight experiment with three alternatives, namely a 4096-point STFT for all methods, the frame length, hop, band and frequency weighting reported in the original papers~\cite{dibiase2000srp,nakamura2011gevd,okutani2012quadrocopter,furukawa2013ncm}, and our STFT with a 300 to 8000\,Hz band.
+MUSIC takes the settings of GEVD-MUSIC~\cite{nakamura2011gevd}.
+Method E takes those of the state-informed model that inspired it~\cite{furukawa2013ncm}, which reports no band, so E keeps ours.
+SRP-PHAT computes one response per block as in the original~\cite{dibiase2000srp}, and these responses are summed over each window, so that all methods are scored per window.
+In this column, the generalized eigenvectors are not rescaled, and D reaches 71.1\% when the whitened eigenvectors are used instead, as written in~\cite{okutani2012quadrocopter}.
+All columns use free-field steering vectors, whereas~\cite{nakamura2011gevd,furukawa2013ncm} measured theirs.
+With the 4096-point STFT, the noise models lose most of their advantage, and raising the overlap to 94\% does not restore it (D 34.0\%, E 38.1\%).
+With its original settings, SRP-PHAT reaches 39.4\%, and this gain comes from its band extending to 8\,kHz.
+Restricted to 300 to 4000\,Hz, it falls back to 17.6\%.
+When all methods use the wider band, every method improves, and D and E stay 29 and 34 points above A.
+In every setting, a method with a noise model is the most accurate.
+Since the source here is white noise, the gain above 4\,kHz need not carry over to speech, which carries most of its energy below 4\,kHz.
+F also gains from the wider band, reaching 82.4\% [74.4, 89.5], and speed bins bring it to 83.4\% [75.4, 90.5], a gain of 1.0 point [0, 2.3] ($p=0.25$).
+We therefore keep the 300 to 4000\,Hz band, which is similar to those of earlier robot and drone studies~\cite{nakamura2011gevd,okutani2012quadrocopter}.}
+
+\begin{table}[t]
+\color{blue}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.4pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & 1024 pt & 4096 pt & Original & 1024 pt \\
+Method & 0.3--4\,kHz & 0.3--4\,kHz & papers & 0.3--8\,kHz \\
+\midrule
+A\; SRP-PHAT & 18.4\% & 28.9\% & 39.4\% & 49.1\% \\
+B\; + tone mask & 21.2\% & 33.0\% & 21.2\% & 51.2\% \\
+C\; MUSIC & 23.3\% & 33.0\% & 28.9\% & 47.6\% \\
+D\; GEVD, one model & 60.4\% & 34.0\% & 53.2\% & 78.0\% \\
+E\; GEVD, speed bins & \textbf{69.8\%} & \textbf{38.9\%} & \textbf{71.9\%} & \textbf{83.1\%} \\
+\bottomrule
+\end{tabular}
+\caption{Ablation of the analysis settings on DREGON. Share of windows within $10^\circ$. B is our own baseline with no original paper, so that column repeats its 1024-point result.}
+\label{tab:ablation}
+\end{table}
+
 \paragraph{Noise level.}
-On clean recordings mixed with flight noise, all methods are accurate at 0 and $-5$\,dB.
-At $-10$\,dB, D and E still localize 90\% of 48 trials within $10^\circ$, against 40--46\% for the others; at $-20$\,dB every method fails.
-The noise model therefore buys about 5\,dB of operating range, but no method reaches the SNR at which distant calls for help would be heard.
+%On clean recordings mixed with flight noise, all methods are accurate at 0 and $-5$\,dB.
+%At $-10$\,dB, D and E still localize 90\% of 48 trials within $10^\circ$, against 40--46\% for the others; at $-20$\,dB every method fails.
+%The noise model therefore buys about 5\,dB of operating range, but no method reaches the SNR at which distant calls for help would be heard.
+\rev{For this sweep, 24 motors-off recordings (azimuth 45 to $90^\circ$, elevation 0 to $-30^\circ$) are each mixed with two different flight-noise segments at broadband SNRs from 0 to $-25$\,dB, giving 48 mixtures per level.
+The noise model is learned on the first half of the noise-only flight (about 26\,s with the motors running), and the mixing noise is taken from the second half.
+The broadband SNR is the ratio of the sample powers of the clean recording and the noise, averaged over all microphones and without band limiting.
+The frames are aligned in the same way on the motors-off recordings themselves, before any noise is added (median residual $3.0^\circ$).
+\Cref{tab:snr} shows that all methods are accurate at 0 and $-5$\,dB.
+At $-10$\,dB, D and E still localize 90\% of trials within $10^\circ$, while the others fall to 40 to 46\%.
+At $-15$\,dB, they keep 29 to 35\% against at most 2\% for the others, and from $-20$\,dB every method fails.
+The noise model therefore delays the collapse of accuracy by about 5\,dB, but no method reaches the SNR at which distant calls for help would be heard.
+Resampling the 24 directions, the gain of D over A is 50.0 points [35.4, 64.6] at $-10$\,dB and 27.1 points [8.3, 47.9] at $-15$\,dB.
+The difference between D and E is 0 at $-10$\,dB and 6.2 points [0, 16.7] at $-15$\,dB (exact McNemar test, $p=0.25$), so the sweep supports the noise model but not an added benefit of the speed bins.
+F keeps 92 and 46\%, which is 52.1 points [37.5, 66.7] and 43.8 points [29.2, 58.3] above A.
+F leads D by 2.1 points [$-10.4$, 16.7] at $-10$\,dB and by 16.7 points [8.3, 27.1] at $-15$\,dB, and speed bins add nothing to F.}
+
+\begin{table}[t]
+\color{blue}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.4pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Method & 0\,dB & $-5$\,dB & $-10$\,dB & $-15$\,dB & $-20$\,dB & $-25$\,dB \\
+\midrule
+A\; SRP-PHAT & 100\% & 98\% & 40\% & 2\% & 0\% & 0\% \\
+B\; + tone mask & 100\% & 100\% & 46\% & 2\% & 0\% & 0\% \\
+C\; MUSIC & 100\% & 98\% & 46\% & 0\% & 0\% & 0\% \\
+D\; GEVD, one model & 100\% & 100\% & 90\% & 29\% & 0\% & 0\% \\
+E\; GEVD, speed bins & 100\% & 100\% & 90\% & 35\% & 0\% & 0\% \\
+F\; Wiener, one model & 100\% & 100\% & \textbf{92\%} & \textbf{46\%} & 0\% & 0\% \\
+F\; Wiener, speed bins & 100\% & 100\% & 90\% & \textbf{46\%} & 0\% & 0\% \\
+\bottomrule
+\end{tabular}
+\caption{Share of trials within $10^\circ$ for motors-off DREGON recordings mixed with held-out flight noise (48 mixtures per level).}
+\label{tab:snr}
+\end{table}
 
 \paragraph{Signal quality.}
 Because a beamformer is linear, the target and the noise can be passed through it separately and the output SNR measured exactly.
-Steering an MVDR beamformer (\cref{eq:mvdr}) with the learned covariance towards E's \emph{estimated} direction raises the SNR over a single microphone by a median of 9.7\,dB with speed-binned and 9.1\,dB with a single covariance, against 4.0\,dB for delay-and-sum, over 48 mixtures at $-10$\,dB input SNR.
+%Steering an MVDR beamformer (\cref{eq:mvdr}) with the learned covariance towards E's \emph{estimated} direction raises the SNR over a single microphone by a median of 9.7\,dB with speed-binned and 9.1\,dB with a single covariance, against 4.0\,dB for delay-and-sum, over 48 mixtures at $-10$\,dB input SNR.
+\rev{We steer an MVDR beamformer (\cref{eq:mvdr}) with the learned covariance towards E's \emph{estimated} direction rather than the true one, which reflects realistic operation, and score the SNR gain over a single microphone between 200 and 8000\,Hz.
+Over 48 mixtures at $-10$\,dB input SNR, it raises the SNR by a median of 9.7\,dB with the speed-binned covariance and 9.1\,dB with a single covariance, against 4.0\,dB for delay-and-sum.
+The median paired gain of speed-binned MVDR is 6.0\,dB [5.5, 6.3] over delay-and-sum and 0.6\,dB [0.5, 0.7] over one covariance.
+At $-15$\,dB input, the MVDR gain falls to 4.4\,dB, since the estimated direction is often wrong.
+The diagonal loading is $10^{-2}$ times the mean noise power, and between $10^{-4}$ and $10^{-2}$ the median gain stays at 9.7 to 9.8\,dB, while $10^{-1}$ gives 8.9\,dB.
+This measure suits a white-noise source, whereas speech would also need perceptual metrics.}
 \Cref{fig:snrfreq} shows that the gain is largest between 1 and 4\,kHz.
 
 \begin{figure}[t]
@@ -75,40 +278,122 @@ Steering an MVDR beamformer (\cref{eq:mvdr}) with the learned covariance towards
 Rotor tones are predictable from the motor log, but most of the noise energy on this drone is not on those tones.
 The flight controller's IMU, sampled at about 1\,kHz, cannot observe vibration above 500\,Hz, which covers the lowest rotor harmonics (from about 140\,Hz) but not the band used for localization.
 
+\rev{\subsection{Recorded speech on a second drone (AGH)}
+\label{sec:case-agh}
+
+DREGON gives only white noise in flight, so we test speech on the anechoic quadrotor of the SP Cup team from AGH University, Krak\'ow~\cite{deleforge2019spcup}.
+This set holds white noise from 8 directions and recorded speech from 2 directions with the motors off, and ego-noise at five throttle settings.
+Its array geometry is not published, so we measured the microphone positions from GCC-PHAT time differences on the white-noise recordings.
+Each direction is scored with a geometry fitted only to other directions at least $15^\circ$ away (aperture 25\,cm, fit residual 12.5\,$\mu$s, held-out errors 6.9 to 65\,$\mu$s).
+Clean recordings are mixed with noise at throttles of 100, 80 and 60\%, at equal SNR between 300 and 4000\,Hz, with 16 trials per file and throttle.
+This gives 96 speech and 384 white-noise trials per level.
+Noise models are learned on the first half of each throttle file, and the mixing noise comes from the second half.
+D and F pool the throttles, whereas E and F with state use the throttle of the mixture, which is known exactly here.
+
+\Cref{tab:agh} gives the results.
+At 0 and $-5$\,dB, all methods score 85.4\% on speech and, down to $-20$\,dB, 87.5\% on white noise.
+These ceilings come from single directions that stay wrong at every SNR, such as one white-noise direction with an error of $11.9^\circ$, which we attribute to the measured geometry.
+The collapse on speech comes about 10\,dB earlier than on white noise.
+The noise model again extends the working range, with D better than A in 29 of 29 differing speech trials at $-15$\,dB.
+On this drone the known throttle helps more than on DREGON.
+E leads D in 18 of 18 differing trials on speech at $-20$\,dB ($p<0.001$), in 16 of 17 at $-25$\,dB, and in 111 of 117 on white noise at $-30$\,dB.
+F is not always the best method here, since D beats F in 21 of 21 differing speech trials at $-15$\,dB.
+These tests treat trials as independent, there are only two speech directions, and the drone is held, so this is supporting evidence and not a flight result.
+On the two recordings with white noise and running motors together, every method reaches 100\% at very high speed (44 windows).
+At medium speed (50 windows), C reaches 64\% and D 98\%, whereas A, E and F reach 100\%, using the closest throttle setting because these recordings describe the throttle only in words.}
+
+\begin{table}[t]
+\color{blue}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{1.6pt}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+ & \multicolumn{4}{c}{Speech} & \multicolumn{3}{c}{White noise} \\
+\cmidrule(lr){2-5}\cmidrule(l){6-8}
+Method & $-10$ & $-15$ & $-20$ & $-25$ & $-25$ & $-30$ & $-35$\,dB \\
+\midrule
+A\; SRP-PHAT & 72.9 & 51.0 & 9.4 & 0.0 & 58.1 & 0.8 & 0.0 \\
+D\; GEVD, pooled & \textbf{85.4} & 81.2 & 31.2 & 1.0 & \textbf{87.5} & 52.3 & 0.5 \\
+E\; GEVD, throttle & \textbf{85.4} & \textbf{83.3} & 50.0 & \textbf{16.7} & \textbf{87.5} & 79.7 & 5.5 \\
+F\; Wiener, pooled & 83.3 & 59.4 & 25.0 & 0.0 & 87.0 & 37.2 & 1.6 \\
+F\; Wiener, throttle & \textbf{85.4} & 79.2 & \textbf{53.1} & 15.6 & \textbf{87.5} & \textbf{80.7} & \textbf{8.6} \\
+\bottomrule
+\end{tabular}
+\caption{Second drone (AGH, held, anechoic). Share of trials within $10^\circ$ (\%) at equal SNR between 300 and 4000\,Hz, with real speech (2 directions, 96 trials per level) or white noise (8 directions, 384 trials per level) mixed with held-out noise. E and F with state use the known throttle.}
+\label{tab:agh}
+\end{table}
+
+\rev{\paragraph{An outdoor flight we could not score.}
+We also tried the outdoor flights of the KumamoTech team in the same collection~\cite{deleforge2019spcup}, with 16 microphones and logged position and attitude.
+The voice in these flights has no activity labels, so we first checked the ground truth on a whistle that is clearly audible.
+The best method and source reach only 32.0 and 26.4\% in azimuth within $20^\circ$ on the two flights, against 11\% by chance, and the alignment differs between flights.
+The source height is not logged and the position comes from GPS.
+We therefore do not score these flights.}
+
 \subsection{Ego-noise across five drones}
 \label{sec:case-drones}
 
 A single drone cannot show whether these findings are general.
-We therefore analyze noise-only recordings of four more quadrotors with 8-microphone arrays, released with the IEEE Signal Processing Cup 2019~\cite{deleforge2019spcup}: a DJI Phantom~4 Pro hovering outdoors at 2 and 10\,m, an MK Quadro~V3, an Intel Aero in manually controlled hover, and a quadrotor recorded at varying rotor speeds in an anechoic chamber (team AGH).
-Of the other multichannel sets in that collection, two could no longer be downloaded, and one used a 16-microphone array whose published coordinates conflict with its photographs, so we did not use them.
+%We therefore analyze noise-only recordings of four more quadrotors with 8-microphone arrays, released with the IEEE Signal Processing Cup 2019~\cite{deleforge2019spcup}: a DJI Phantom~4 Pro hovering outdoors at 2 and 10\,m, an MK Quadro~V3, an Intel Aero in manually controlled hover, and a quadrotor recorded at varying rotor speeds in an anechoic chamber (team AGH).
+\rev{We therefore analyze noise-only recordings of four more quadrotors with 8-microphone arrays, released with the IEEE Signal Processing Cup 2019~\cite{deleforge2019spcup}.
+These are a DJI Phantom~4 Pro hovering outdoors at 2 and 10\,m, an MK Quadro~V3 held about 0.5\,m above the floor, an Intel Aero in manually controlled hover, and the AGH quadrotor of \cref{sec:case-agh}, recorded at varying rotor speeds in an anechoic chamber.
+Together with 50\,s of steady flight from the DREGON noise-only recording, this gives five drones (\cref{tab:casedata}).}
+%Of the other multichannel sets in that collection, two could no longer be downloaded, and one used a 16-microphone array whose published coordinates conflict with its photographs, so we did not use them.
+\rev{The KumamoTech flights could not be validated (\cref{sec:case-agh}), and the remaining sets have fewer microphones or could not be downloaded.}
 Because the arrays differ, we use two measures that need no array geometry (\cref{fig:drones}).
 The \emph{tonal share} is the share of 100--4000\,Hz noise energy in narrow spectral peaks, at least 6\,dB above a 300\,Hz running-median floor, computed on 1\,s chunks and averaged.
+\rev{It uses 8192-point Welch spectra.
+As an established check, we also report the harmonic-to-noise ratio (HNR)~\cite{boersma1993hnr}, computed with the autocorrelation method of Praat in the same band and averaged over the microphones.
+The HNR assumes a single periodic source, whereas a quadrotor has four rotors at slightly different speeds, so we use it only as a second measure of tonality.}
 We define the \emph{learned rejection} to measure spatial structure.
 It builds on the model of Wang and Cavallaro~\cite{wang2016earinthesky}, in which each rotor acts as one directional noise source and a diffuse part is added.
 Because the microphones and motors are fixed to the frame, the acoustic mixing is stationary.
 We learn the four strongest noise directions on the first half of a recording, one per rotor, and remove them from the second half with an orthogonal projection, as in the eigencanceler~\cite{haimovich1996eigencanceler}.
 The learned rejection is the resulting drop in noise power, averaged over 300--4000\,Hz bins.
+\rev{For spatially white noise on eight microphones it is 3\,dB, since four of the eight dimensions hold half of the power.}
 For the three arrays whose geometry was published, we compare it with a spherically diffuse noise field on the same array.
+\rev{This reference uses the theoretical coherence $\sin(2\pi f d/c)/(2\pi f d/c)$ between microphones at distance $d$, not a simulation.
+Since the rejection depends on the aperture and microphone spacing, values are compared with this reference and not directly between arrays.}
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.68\textwidth]{fig/multidrone_egonoise.png}
-\caption{Ego-noise of five quadrotors. Left: share of noise energy in rotor tones. Right: noise power removed from one half of a recording by a four-dimensional spatial subspace learned on the other half, against a diffuse noise field on the same array where the geometry is published. * represents a drone that was not flying during the recording. The MK Quadro~V3 was held about 0.5\,m above the floor. The AGH quadrotor stood still in an anechoic chamber.}
+%\caption{Ego-noise of five quadrotors. Left: share of noise energy in rotor tones. Right: noise power removed from one half of a recording by a four-dimensional spatial subspace learned on the other half, against a diffuse noise field on the same array where the geometry is published. * represents a drone that was not flying during the recording. The MK Quadro~V3 was held about 0.5\,m above the floor. The AGH quadrotor stood still in an anechoic chamber.}
+\caption{Ego-noise of five quadrotors. Left: share of noise energy in rotor tones. Right: noise power removed from one half of a recording by a four-dimensional spatial subspace learned on the other half, against a diffuse noise field on the same array where the geometry is published. * represents a drone that was not flying during the recording. The MK Quadro~V3 was held about 0.5\,m above the floor. The AGH quadrotor stood still in an anechoic chamber. \rev{Its geometry was measured by us (\cref{sec:case-agh}), so the figure shows no diffuse reference for it.}}
 \label{fig:drones}
 \end{figure*}
 
 \paragraph{Results.}
-Tonality differs by a factor of about 60 between drones: from 1\% of the noise energy (Intel Aero) through 16\% (DREGON) to 70\% (MK Quadro~V3).
+%Tonality differs by a factor of about 60 between drones: from 1\% of the noise energy (Intel Aero) through 16\% (DREGON) to 70\% (MK Quadro~V3).
+\rev{Tonality differs by a factor of up to 60 between drones, from 1.2\% of the noise energy on the Intel Aero, through 15.7\% on DREGON, to 69.7\% on the MK Quadro~V3.}
 However, the two highest values come from drones that were not in self-powered flight.
 They are marked with an asterisk (*) in \cref{fig:drones}.
 Among the three flying drones, the tonal share differs by a factor of about 13.
-Masking or cancelling rotor tones is therefore valuable on some drones and nearly irrelevant on others.
-A learned spatial subspace removes 6 to 13\,dB on every drone, and the model stays valid from one half of a recording to the other.
-On the DREGON and MK Quadro~V3 arrays, with apertures of 17 and 15\,cm, it removes 4.5 and 2.7\,dB more than it would from diffuse noise, so the rotor noise is spatially more structured than background noise.
+%Masking or cancelling rotor tones is therefore valuable on some drones and nearly irrelevant on others.
+\rev{Only three flying drones remain, so this is weak evidence about the potential of tone-based methods.
+The two held drones rank highest in all 11 estimator settings we tried, with peak thresholds of 3 to 10\,dB, median widths of 150 to 600\,Hz and 4096 to 16384 points.
+The absolute values depend strongly on these settings, with DREGON ranging from 0.6 to 64.6\%, so only this ordering should be relied on.
+The HNR ranks the five drones similarly (Spearman $\rho=0.8$).
+It is also highest on the two drones that were not flying, the anechoic quadrotor (4.8\,dB) and the MK Quadro~V3 (2.6\,dB), and lowest on the DJI Phantom~4 Pro (0.0\,dB).}
+%A learned spatial subspace removes 6 to 13\,dB on every drone, and the model stays valid from one half of a recording to the other.
+\rev{In contrast, a learned spatial subspace removes 6.0 to 12.9\,dB on every drone, well above the 3\,dB expected for white noise, and the model stays valid from one half of a recording to the other.
+The rejection grows by about 1 to 4\,dB per added eigenvector up to six, with no knee at four, so four follows from the noise model and is not selected by the data.
+With 1 to 6 eigenvectors, it stays above the diffuse reference on the DREGON and MK Quadro arrays and below it on the DJI Phantom array.}
+%On the DREGON and MK Quadro~V3 arrays, with apertures of 17 and 15\,cm, it removes 4.5 and 2.7\,dB more than it would from diffuse noise, so the rotor noise is spatially more structured than background noise.
+\rev{On the DREGON and MK Quadro~V3 arrays, with apertures of 17 and 15\,cm, it removes 4.5 and 2.0\,dB more than it would from diffuse noise, so the rotor noise is spatially more structured than background noise.
+The MK Quadro recordings have one silent channel, so its diffuse reference uses the other seven microphones, for which white noise would give 3.7\,dB.}
 On the 6\,cm DJI Phantom array, however, a spatial model removes \emph{less} ego-noise than it would remove from diffuse noise (8.2 against 19.0\,dB).
-This suggests that the noise is uncorrelated between the microphones.
-Airflow over each microphone capsule may cause this.
+%This suggests that the noise is uncorrelated between the microphones.
+%Airflow over each microphone capsule may cause this.
+\rev{We checked this directly with the magnitude-squared coherence between microphones, which is 0.25 on average (0.14 below 1\,kHz), against 0.51 (0.92) for diffuse noise.
+The noise is therefore much less correlated than a diffuse field, although not uncorrelated, since the rejection still exceeds 3\,dB.
+Airflow over each microphone capsule may cause this, but our data cannot confirm it.}
 Spatial models cannot remove such noise; larger apertures, flow shielding or single-channel suppression are needed instead.
+\rev{The measured AGH geometry adds a third large array.
+With an aperture of 25\,cm, its diffuse reference is 4.9\,dB, so its rejection of 12.9\,dB exceeds that of diffuse noise by 8.1\,dB, and it stays above the reference for 1 to 6 eigenvectors (5.2 to 19.5\,dB against 1.2 to 8.6\,dB).
+Per throttle setting, it ranges from 10.0\,dB at full throttle to 15.1\,dB at 40\%, so the spatial structure is present at every speed we could test.
+This geometry is measured rather than published, so it is weaker evidence than the other two arrays.}
 
 \paragraph{Flight condition and tonality.}
 In flight, the controller continually adjusts the rotor speeds.
@@ -125,14 +410,19 @@ Tonality measured on a drone that is not flying can therefore overstate the tona
 \label{fig:jitter}
 \end{figure*}
 
-\subsection{A robot-head array in a reverberant room (LOCATA)}
+%\subsection{A robot-head array in a reverberant room (LOCATA)}
+\subsection{A robot-head \rev{and a spherical} array in a reverberant room (LOCATA)}
 \label{sec:case-locata}
 
 To test the localizers on a different platform and array, we use the robot-head array of the LOCATA development set~\cite{lollmann2018locata,evers2020locata}: a prototype NAO head with 12 microphones in a pseudo-spherical arrangement, recorded in a room with a reverberation time of about 0.5\,s, with optical tracking of the array and the sources and voice activity labels for every sample.
 We use the three single-source tasks: a static loudspeaker with a static array (task~1), a moving talker with a static array (task~3), and a moving talker with a moving array (task~5).
 The ground-truth direction is computed in the array's own frame from the tracked pose, so no alignment is fitted, and windows are scored when the source is active in at least 80\% of their samples (396 windows in total).
 Methods B and E need motor speeds, which this platform lacks; method D learns its noise covariance from frames of the same recording in which the source is silent, at least 0.5\,s from any speech so that the reverberant tail does not leak in (or from all silent frames when fewer than 20 such frames exist).
-The head has no running motors, so this study probes a regime without ego-noise.
+\rev{This happens for two recordings of task~1 (15 and 8 frames), and the other recordings give 29 to 1396 noise frames.
+Method F uses the same covariance as D.}
+%The head has no running motors, so this study probes a regime without ego-noise.
+\rev{To test the result further, we add the 32-microphone spherical Eigenmike (aperture 8.4\,cm) in the same room, and the LOCATA evaluation set (884 windows from 13, 5 and 5 recordings of tasks 1, 3 and 5), on which nothing was tuned.
+The protocol is the same.}
 
 \begin{table}[t]
 \centering
@@ -142,15 +432,38 @@ The head has no running motors, so this study probes a regime without ego-noise.
 \toprule
 Method & Task 1 (34) & Task 3 (151) & Task 5 (211) \\
 \midrule
-A\; SRP-PHAT & 100\% / $4.8^\circ$ & \textbf{91.4\%} / $\mathbf{2.8^\circ}$ & \textbf{99.1\%} / $\mathbf{2.8^\circ}$ \\
+%A\; SRP-PHAT & 100\% / $4.8^\circ$ & \textbf{91.4\%} / $\mathbf{2.8^\circ}$ & \textbf{99.1\%} / $\mathbf{2.8^\circ}$ \\
+A\; SRP-PHAT & 100\% / $4.8^\circ$ & 91.4\% / $\mathbf{2.8^\circ}$ & \textbf{99.1\%} / $2.8^\circ$ \\
 C\; MUSIC & 100\% / $3.1^\circ$ & 86.1\% / $3.2^\circ$ & 95.7\% / $2.8^\circ$ \\
 D\; GEVD, 0.5\,s guard & 100\% / $3.2^\circ$ & 69.5\% / $5.4^\circ$ & 68.2\% / $4.0^\circ$ \\
 D\; GEVD, no guard & 100\% / $\mathbf{2.8^\circ}$ & 58.3\% / $8.0^\circ$ & 81.0\% / $4.6^\circ$ \\
+\rev{F\; Wiener, 0.5\,s guard} & \rev{100\% / $3.8^\circ$} & \rev{\textbf{92.7\%} / $\mathbf{2.8^\circ}$} & \rev{\textbf{99.1\%} / $\mathbf{2.6^\circ}$} \\
 \bottomrule
 \end{tabular}
 \caption{Localization with the LOCATA robot-head array: share of windows within $10^\circ$ / median angular error. Window counts in parentheses. Task 1: static loudspeaker and array; task 3: moving talker; task 5: moving talker and moving array.}
 \label{tab:locata}
 \end{table}
+
+\begin{table*}[t]
+\color{blue}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+ & \multicolumn{3}{c}{Robot head, evaluation set} & \multicolumn{2}{c}{Eigenmike, development set} & \multicolumn{2}{c}{Eigenmike, evaluation set} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(l){7-8}
+Method & Task 1 (173) & Task 3 (236) & Task 5 (475) & Task 3 (151) & Task 5 (211) & Task 3 (236) & Task 5 (475) \\
+\midrule
+A\; SRP-PHAT & 100 & 90.7 & 98.1 & 57.0 / 78.1 & 74.9 / 94.3 & 60.2 / 78.0 & 66.7 / 94.5 \\
+C\; MUSIC & 100 & 90.3 & 94.7 & 45.7 / 70.9 & 71.6 / 90.0 & 47.9 / 73.7 & 65.1 / 90.9 \\
+D\; GEVD-MUSIC & 100 & 76.7 & 94.3 & 35.1 / 56.3 & 19.9 / 19.9 & 44.9 / 61.4 & 22.9 / 30.9 \\
+F\; Wiener & 100 & 89.0 & 98.1 & 56.3 / 80.1 & 74.4 / 93.8 & 61.0 / 78.8 & 65.7 / 93.9 \\
+\bottomrule
+\end{tabular}
+\caption{LOCATA beyond \cref{tab:locata}. Share of windows (\%) within $10^\circ$ for the robot head, and within $10^\circ$ / $15^\circ$ for the Eigenmike, with window counts in parentheses. The evaluation set is held out, and nothing was tuned on it.}
+\label{tab:locatamore}
+\end{table*}
 
 \paragraph{Results.}
 \Cref{tab:locata} shows that the classical localizers are accurate on this array: SRP-PHAT places 91 to 100\% of windows within $10^\circ$, with median errors of 2.8 to $4.8^\circ$, also when both the talker and the array move.
@@ -158,13 +471,64 @@ The noise model does not help here; with moving talkers it lowers the share with
 The diagnostics explain why.
 The SNR at the array is high, 16 to 25\,dB across recordings, and the background noise is close to diffuse: 75 to 89\% of its energy lies in the four strongest spatial components, against 79\% for a diffuse field on the same array.
 There is little structured noise to remove, so whitening with a covariance estimated from a few hundred frames of changing background noise mainly distorts the spatial spectrum.
+\rev{Four controls support this.
+First, D falls below MUSIC, which isolates the whitening, by 16.6 points [4.3, 30.2] on task~3 and 27.5 points [3.1, 38.8] on task~5, resampling the recordings.
+Second, raising the loading from $10^{-3}$ to 10 brings D back to 85.4 and 96.7\%, close to MUSIC at 86.1 and 95.7\%, whereas loading up to $10^{-2}$ changes little.
+Third, reverberant tails do leak into unguarded frames, which are up to 8\,dB louder, but they are not the main cause.
+With guards of 0.25, 0.5 and 1\,s, D reaches 70.2, 69.5 and 67.5\% on task~3 and 84.8, 68.2 and 66.8\% on task~5.
+Fourth, a covariance from the 100 nearest silent frames (about 1\,s) raises task~5 only to 74.9\%, so array motion explains part of the loss at most.
+The LOCATA papers do not state whether the head was powered~\cite{lollmann2018locata,evers2020locata}.
+On task~5, silent frames are about 9\,dB louder and more tonal than on task~3 (tonal share 42 to 64\% against 1 to 8\%), so the moving setup adds noise of its own and this array is not free of platform noise.}
+
+\rev{\paragraph{Held-out recordings and a second array.}
+\Cref{tab:locatamore} tests the result on data not used so far, and only partly confirms it.
+On the held-out recordings of the robot head, D stays below MUSIC by 13.6 points [6.4, 20.8] on task~3, but by only 0.4 points [$-4.2$, 5.2] on task~5, so the large task~5 loss of the development set does not replicate.
+On the Eigenmike, D falls below MUSIC by 51.7 points [31.1, 80.0] and 42.1 points [21.2, 57.6] on task~5 of the two sets, and by 10.6 points [6.5, 18.6] and 3.0 points [$-4.9$, 14.7] on task~3.
+Six of the eight comparisons therefore show a loss, but its size varies widely between recordings and arrays.
+On this array, every method has a median error of about $8^\circ$ on the static task~1, and all reach 100\% within $15^\circ$.
+This suggests a fixed offset in the array frame that we did not correct, so the table gives both thresholds, and the loss holds at both.
+The Wiener filter separates the covariance from the whitening.
+With the same noise covariance as D, F stays within 2 points of SRP-PHAT in all these comparisons (\cref{tab:locata,tab:locatamore}), for example $-1.7$ points [$-3.7$, 0] on task~3 of the held-out robot-head recordings and $-1.1$ points [$-2.1$, 0.3] on task~5 of the held-out Eigenmike recordings.
+The loss therefore comes from whitening inside a subspace method, not from using a noise covariance as such.}
 
 \subsection{What the case studies show}
 
-Taken together, the three studies support a qualified version of the argument of \cref{sec:egonoise}.
-\emph{(i)} When ego-noise dominates and is spatially structured, an explicit noise model is the largest single gain: on DREGON it raised in-flight accuracy within $10^\circ$ from 18\% to 70\%, and spatial noise models removed 6 to 13\,dB of ego-noise on all five drones.
-\emph{(ii)} State information adds most when the target is weak: motor-speed-binned models gained 17 points over a single model on the quiet-source flight.
-\emph{(iii)} The value of tone-based methods depends on the drone and on whether it is flying. Tonality ranged from 1\% to 70\% of the ego-noise energy, and rotor-speed variation in flight lowered it.
-\emph{(iv)} A noise model is not free: when the SNR is high and the background close to diffuse, as on the robot head, it costs accuracy, so a system should decide from the measured noise conditions whether to apply it.
-\emph{(v)} Array aperture and airflow limit what any spatial model can do, as the 6\,cm array showed.
+%Taken together, the three studies support a qualified version of the argument of \cref{sec:egonoise}.
+\rev{Taken together, the studies support a qualified version of the argument of \cref{sec:egonoise}.}
+%\emph{(i)} When ego-noise dominates and is spatially structured, an explicit noise model is the largest single gain: on DREGON it raised in-flight accuracy within $10^\circ$ from 18\% to 70\%, and spatial noise models removed 6 to 13\,dB of ego-noise on all five drones.
+\rev{\emph{(i)} When ego-noise dominates and is spatially structured, an explicit noise model is the largest single gain.
+On DREGON it raised in-flight accuracy within $10^\circ$ from 18\% to 60\%, and to 70\% with speed bins (\cref{tab:case}), it delayed the collapse of accuracy by about 5\,dB (\cref{tab:snr}), and it doubled the beamforming gain (\cref{fig:snrfreq}).
+Spatial noise models removed 6 to 13\,dB of ego-noise on all five drones (\cref{fig:drones}).
+In every analysis setting we tried, a method with a noise model was the most accurate (\cref{tab:ablation}).}
+%\emph{(ii)} State information adds most when the target is weak: motor-speed-binned models gained 17 points over a single model on the quiet-source flight.
+\rev{\emph{(ii)} The added benefit of the motor state is smaller and less general.
+With GEVD-MUSIC on DREGON, speed bins gained 17.5 points on the quiet-source flight, but a Wiener filter with one covariance matched this accuracy without any motor data, and the gain shrank when the single covariance was learned on a shorter span.
+On the held AGH drone with a known throttle, the state added 18.8 points on speech at $-20$\,dB, close to the collapse (\cref{tab:agh}).}
+\emph{(iii)} The value of tone-based methods depends on the drone and on whether it is flying. Tonality ranged from 1\% to 70\% of the ego-noise energy, and rotor-speed variation in flight lowered it\rev{ (\cref{fig:drones,fig:jitter})}.
+%\emph{(iv)} A noise model is not free: when the SNR is high and the background close to diffuse, as on the robot head, it costs accuracy, so a system should decide from the measured noise conditions whether to apply it.
+\rev{\emph{(iv)} A noise model is not free.
+When the SNR is high and the background close to diffuse, as on the robot head, GEVD-MUSIC lost accuracy against MUSIC in six of eight comparisons on two arrays and two LOCATA sets, by very different amounts (\cref{tab:locata,tab:locatamore}).
+A Wiener filter with the same covariance stayed within 2 points of SRP-PHAT, so the failure belongs to whitening in a subspace method.}
+%\emph{(v)} Array aperture and airflow limit what any spatial model can do, as the 6\,cm array showed.
+\rev{\emph{(v)} Array aperture and airflow limit what any spatial model can do, as the 6\,cm array showed, where the noise was only weakly correlated between microphones.
+\emph{(vi)} Recorded speech on the AGH drone collapsed about 10\,dB earlier than white noise, so white-noise results overstate what a drone can hear.}
 All methods in these studies are established; the contribution is the controlled, reproducible comparison across platforms.
+
+\rev{\paragraph{Practical guidelines.}
+(1) Record a short noise-only segment and learn a spatial noise model.
+In our data, 20\,s with the motors running gave about the same accuracy as longer recordings, whereas 5\,s spans were unreliable.
+A Wiener filter was a robust first choice, although GEVD-MUSIC was better on AGH speech at $-15$\,dB.
+(2) Measure the tonal share of the noise in flight before investing in tone masking.
+(3) Consider larger arrays and shield the microphones from airflow.
+In our data, only the three arrays of 15\,cm or more, one with a measured geometry, showed ego-noise more structured than diffuse noise, against one smaller array, so this is an observation rather than a general rule.
+(4) Check the SNR and how diffuse the background is before applying a noise model, and always report a baseline without it.
+At high SNR, prefer a filter with the noise covariance over whitening in a subspace method.}
+
+\rev{\paragraph{Threats to validity.}
+Our studies have six main limitations.
+First, the target sources in the DREGON experiments are loudspeakers playing white noise, which is easier to localize than speech or calls, and recorded speech comes only from a held drone with two directions.
+Second, only DREGON provides rotor speeds, and AGH provides only throttle settings on a held drone, so the benefit of state information in flight is shown on a single drone.
+Third, the LOCATA results come from two arrays in one room, so they should be confirmed in other settings.
+Fourth, with 48 trials per SNR level, differences of a few points in the controlled SNR experiment are within noise.
+Fifth, DREGON provides only two scored flights, so flight-level variation cannot be estimated.
+Sixth, the form of F was chosen after seeing flight results, the AGH geometry is measured rather than published, and the Eigenmike results include an uncorrected offset.}

@@ -26,9 +26,11 @@ Navigation & success rate; success weighted by path length & \cite{chen2020sound
 \end{table}
 
 \paragraph{Recommendations.}
-Five practices would make results on autonomous platforms more comparable.
+%Five practices would make results on autonomous platforms more comparable.
+\rev{Six practices would make results on autonomous platforms more comparable.}
 \emph{(i) Report SNR at the microphones}, measured or controlled, rather than only the source level; performance on drones depends far more on SNR than on method details (\cref{sec:case-dregon}).
 \emph{(ii) Separate noise-model data from test data}: when a method learns an ego-noise model, it should be learned from recordings disjoint from the test signals, as in the held-out protocol of our drone case study (\cref{sec:case-dregon}).
 \emph{(iii) Fix frame alignment independently of the methods compared}: array and ground-truth frames should be aligned once, on separate data, with a method not under test.
 \emph{(iv) Report per-condition results}, such as per flight or per SNR, since averages can hide where a method helps most; in our drone case study the benefit of motor-speed information is concentrated in the quiet-source condition.
 \emph{(v) Report a baseline without a noise model and the noise conditions}, because a noise model can also cost accuracy when the SNR is high and the noise close to diffuse, as on the robot-head array of \cref{sec:case-locata}.
+\rev{\emph{(vi) Account for correlated windows}, since neighboring windows of one flight are not independent. Intervals should then come from a block bootstrap and tests from block resampling, as in \cref{sec:case-dregon}, where the 391 windows count as only about 58 to 282 independent ones.}
