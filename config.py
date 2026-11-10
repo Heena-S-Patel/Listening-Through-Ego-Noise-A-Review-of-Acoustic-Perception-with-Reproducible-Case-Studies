@@ -59,12 +59,16 @@ SPEED_SCALE = 1.0
 # ---------------------------------------------------------------------------
 # Signal processing
 # ---------------------------------------------------------------------------
-NFFT = 1024            # STFT size (about 23 ms at 44.1 kHz)
-HOP = 512
+NFFT = int(os.environ.get("NFFT", 1024))     # STFT size (about 23 ms at 44.1 kHz)
+HOP = int(os.environ.get("HOP", NFFT // 2))
 FRAME_SEC = 0.5        # localisation window, same as the SP Cup 2019 flight task
 FRAME_HOP_SEC = 0.25
 BAND_HZ = (300.0, 4000.0)   # frequency band used for localisation
 MUSIC_BIN_STEP = 2          # use every 2nd STFT bin for the subspace methods (speed)
+
+# Frame alignment (method A with these settings, whatever the settings under test)
+REF_NFFT, REF_HOP = 1024, 512
+REF_BAND_HZ = (300.0, 4000.0)
 
 # Direction search grid (degrees)
 AZ_STEP = 3
@@ -72,16 +76,31 @@ EL_STEP = 3
 EL_BOUNDS = (-90, 90)
 
 # Rotor harmonic masking (method B)
-MASK_NFFT = 4096            # finer frequency resolution (about 11 Hz) so individual rotor tones can be separated
-MASK_HOP = 1024
+MASK_NFFT = int(os.environ.get("MASK_NFFT", NFFT))   # same STFT as the other methods; set 4096 to resolve single rotor tones
+MASK_HOP = int(os.environ.get("MASK_HOP", HOP * MASK_NFFT // NFFT))   # same overlap as the other methods
 MASK_MULTIPLE = N_BLADES    # mask blade passing harmonics (k x N_BLADES x shaft rate)
 MASK_FMAX = 4000.0          # mask predicted rotor tones up to this frequency
 MASK_HALF_WIDTH_BINS = 0    # +- bins around each predicted tone
 MASK_PROMINENCE_DB = 3.0    # only mask predicted tones that rise above the local noise floor
 MASK_MAX_COVERAGE = 0.4     # never mask more than this share of the band
 
+# Ablation over STFT settings. "shared" runs every method with the settings above.
+# "original" runs each method with the settings reported in its own paper, given in seconds so that
+# they carry over to any sampling rate (scipy's default Hann window matches all of them).
+PROTOCOL = os.environ.get("PROTOCOL", "shared")
+ORIGINAL_SETTINGS = {
+    # DiBiase 2000, Sect. 7.1: Hanning-windowed 25 ms blocks, 12.5 ms advance, 300 Hz to 8 kHz
+    "A": {"frame": 0.025, "hop": 0.0125, "band": (300.0, 8000.0)},
+    # Nakamura et al. 2011, Sects. IV-D and V-A: 512 and 160 samples at 16 kHz, 500 to 3000 Hz
+    "CD": {"frame": 0.032, "hop": 0.010, "band": (500.0, 3000.0)},
+    # Furukawa et al. 2013, Sect. IV-B: Hann, 512 and 256 samples at 16 kHz; no band is given, so ours is kept
+    "E": {"frame": 0.032, "hop": 0.016, "band": BAND_HZ},
+}
+# Yen et al. 2023, Table IV: STFT length 2048 with shift 1024 at 48 kHz
+ORIGINAL_MVDR_FRAME_SEC = 2048 / 48000
+
 # Noise covariance model
-NCM_RPM_BINS = 6            # number of motor speed bins for the RPM-informed noise covariance
+NCM_RPM_BINS = 6           # number of motor speed bins for the RPM-informed noise covariance
 DIAG_LOADING = 1e-3         # relative diagonal loading for numerical stability
 
 # SNR sweep (experiment 3)

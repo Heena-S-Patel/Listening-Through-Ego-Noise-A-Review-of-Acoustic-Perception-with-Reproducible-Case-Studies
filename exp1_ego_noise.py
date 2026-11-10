@@ -81,6 +81,20 @@ def main():
                      "energy_share_all_shaft_tones": e_shaft / e_tot, "bin_share_all_shaft_tones": b_shaft / n})
     metrics["energy_by_band"] = rows
 
+    # the same share at 1 to 2 kHz with the STFT of method B in the DREGON flight table of the paper, tones on their exact bins
+    f4, tt4, Z4 = scipy.signal.stft(x, fs=fs, nperseg=4096, noverlap=3072)
+    P4 = np.abs(Z4) ** 2
+    f04 = dregon_io.speeds_at(rec, rec["audio_ts"][np.clip((tt4 * fs).astype(int), 0, len(x) - 1)]) * scale
+    bmask = (f4 >= 1000) & (f4 < 2000)
+    e_bpf = e_tot = b_bpf = 0.0
+    run4 = np.where(f04.mean(axis=1) > 0.3 * np.median(f04.mean(axis=1)))[0]
+    for j in run4:
+        mb = rotor.comb_bins(f4, f04[j], config.N_BLADES, 2000, 0) & bmask
+        e_tot += P4[bmask, j].sum()
+        e_bpf += P4[mb, j].sum()
+        b_bpf += mb.sum() / bmask.sum()
+    metrics["bpf_tones_1_2kHz_4096pt"] = {"bin_share": b_bpf / len(run4), "energy_share": e_bpf / e_tot}
+
     fig, ax = plt.subplots(figsize=(8, 3.6))
     xi = np.arange(len(rows))
     ax.bar(xi - 0.3, [r["energy_share_bpf_tones"] * 100 for r in rows], 0.2, label="energy on blade tones", color="#d62728")

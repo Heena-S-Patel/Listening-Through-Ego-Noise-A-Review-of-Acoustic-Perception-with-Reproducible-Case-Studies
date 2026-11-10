@@ -38,33 +38,42 @@ def get_speed_scale(noise_rec):
     return s
 
 
-def stft_bins(x, fs, sel, chunk_sec=10.0):
+def stft_bins(x, fs, sel, chunk_sec=10.0, nfft=None, hop=None):
     """STFT of a long multichannel signal, keeping only the bins in `sel`, computed chunk by chunk."""
-    nfft, hop = config.NFFT, config.HOP
+    nfft, hop = nfft or config.NFFT, hop or config.HOP
     chunk = int(chunk_sec * fs) // hop * hop
     out, centres = [], []
     for s in range(0, len(x) - nfft, chunk):
         seg = x[s: s + chunk + nfft - hop]
         if len(seg) < nfft:
             break
-        _, X = loc.stft_multi(seg, fs)
+        _, X = loc.stft_multi(seg, fs, nfft, hop)
         out.append(X[:, sel, :].astype(np.complex64))
         centres.append(s + nfft // 2 + hop * np.arange(X.shape[2]))
     return np.concatenate(out, axis=2), np.concatenate(centres)
 
 
-def build_ncm_model(rec, sel, sample_range=None):
+def build_ncm_model(rec, sel, sample_range=None, nfft=None, hop=None):
     """Global and RPM binned noise covariance from a noise-only recording."""
     x = rec["audio"]
     offset = 0
     if sample_range is not None:
         offset = sample_range[0]
         x = x[sample_range[0]: sample_range[1]]
-    X, centres = stft_bins(x, rec["fs"], sel)
+    X, centres = stft_bins(x, rec["fs"], sel, nfft=nfft, hop=hop)
     t = rec["audio_ts"][np.clip(centres + offset, 0, len(rec["audio_ts"]) - 1)]
     mean_speed = dregon_io.speeds_at(rec, t).mean(axis=1)
     running = mean_speed > 0.3 * np.median(mean_speed)
     return loc.NoiseCovModel(X[:, :, running], np.arange(len(sel)), mean_speed[running], config.NCM_RPM_BINS)
+
+
+def build_noise_models(locz, rec, sample_range=None):
+    """Noise model(s) for locz.run: one model with the shared STFT, or, in the original-settings ablation,
+    one per method group, each learned with the STFT of that group."""
+    if not locz.original:
+        return build_ncm_model(rec, locz.sel, sample_range)
+    return {g: build_ncm_model(rec, locz.groups[g]["sel"], sample_range, locz.groups[g]["nfft"], locz.groups[g]["hop"])
+            for g in ("CD", "E")}
 
 
 def window_starts(n_samples, fs, frame_sec=None, hop_sec=None):

@@ -3,12 +3,13 @@ Sound source localisation methods compared in the case studies.
 
 A  SRP-PHAT               classic baseline (same family as the SP Cup 2019 baseline)
 B  SRP-PHAT + RPM mask    ignore the frequency bins where the motor log predicts rotor tones
-                          (uses a finer 4096 point STFT so single rotor tones can be resolved)
 C  MUSIC                  subspace method with no noise model
 D  GEVD-MUSIC global NCM  subspace method that whitens with one average noise covariance
 E  GEVD-MUSIC RPM NCM     same, but the noise covariance is picked by current motor speed
 
 C, D and E use the same direction grid and frequency band as A and B.
+By default all methods share one STFT (config.NFFT). the DREGON flight table of the paper gives B a finer STFT than the others,
+which is reproduced with MASK_NFFT=4096 MASK_HOP=1024.
 """
 import numpy as np
 import scipy.linalg
@@ -88,8 +89,17 @@ class SubspaceLocaliser:
         delays = (u @ mic_pos.T) / config.SPEED_OF_SOUND          # (D, M), positive means earlier arrival
         self.A = np.exp(2j * np.pi * freqs_sel[:, None, None] * delays[None]).astype(np.complex64)  # (F, D, M)
 
-    def spectrum(self, Rx, Phi=None, n_src=1):
-        """Rx and Phi have shape (F, M, M). Phi None means plain MUSIC."""
+    def spectrum(self, Rx, Phi=None, n_src=1, style="shared"):
+        """Rx and Phi have shape (F, M, M). Phi None means plain MUSIC.
+        style sets how the narrowband spectra are combined over frequency:
+          shared    squared projection, each bin normalised by its maximum (this paper, Eq. 2)
+          nakamura  unsquared projection, plain sum over bins (Nakamura et al. 2011, Eq. 2; Okutani et al. 2012, Eq. 5)
+          furukawa  squared projection, weighted by the largest generalized eigenvalue (Furukawa et al. 2013, Eqs. 19-21)
+        |a^H a| = M is the same for every direction, so the numerators of the original spectra are dropped.
+        Generalized eigenvectors have no fixed scale. The shared style scales them to unit norm, a choice of this paper.
+        The original styles add no scaling, so scipy's e^H N e = 1 applies, as in Furukawa et al. 2013, Eqs. 22-23."""
+        if style != "shared":
+            return self._spectrum_original(Rx, Phi, n_src, style)
         F, M, _ = Rx.shape
         out = np.zeros(self.A.shape[1])
         for f in range(F):
@@ -107,11 +117,46 @@ class SubspaceLocaliser:
             out += p / p.max()
         return out
 
+    def _spectrum_original(self, Rx, Phi, n_src, style):
+        F, M, _ = Rx.shape
+        out = np.zeros(self.A.shape[1])
+        for f in range(F):
+            R = Rx[f]
+            if Phi is None:
+                w, V = np.linalg.eigh(R)
+                En = V[:, : M - n_src]
+            else:
+                N = Phi[f] + config.DIAG_LOADING * np.real(np.trace(Phi[f])) / M * np.eye(M)
+                w, V = scipy.linalg.eigh(R, N)
+                En = V[:, : M - n_src]
+            g = np.abs(self.A[f] @ En.conj())
+            if style == "nakamura":
+                out += 1.0 / (np.sum(g, axis=1) + 1e-12)
+            else:
+                out += w[-1] / (np.sum(g ** 2, axis=1) + 1e-12)
+        return out
+
 
 def spatial_cov(X, sel):
     """X (M, F, T) -> (F_sel, M, M) averaged over frames."""
     Xs = X[:, sel, :]
     return np.einsum("mft,nft->fmn", Xs, Xs.conj()) / Xs.shape[2]
+
+
+def wiener_filter(X, Rn, clip=True):
+    """Multichannel Wiener filter s = (Rx - Rn) Rx^-1 x, with Rx from the frames of X itself. X (M, F, T), Rn (F, M, M).
+    Written through the generalized eigenvalues of (Rx, Rn), which also gives the clipping: a short window can give
+    eigenvalues below 1, and these directions then hold only noise. clip=False keeps them."""
+    M = X.shape[0]
+    Rx = np.einsum("mft,nft->fmn", X, X.conj()) / X.shape[2]
+    trn = np.real(np.trace(Rn, axis1=1, axis2=2))[:, None, None] / M
+    L = np.linalg.cholesky(Rn + (config.DIAG_LOADING * trn + 1e-20) * np.eye(M))
+    Li = np.linalg.inv(L)
+    lam, U = np.linalg.eigh(Li @ Rx @ Li.conj().transpose(0, 2, 1))
+    lam = np.maximum(lam, 1.0) if clip else np.maximum(lam, 1e-3)
+    g = 1 - 1 / lam
+    W = (L @ U * g[:, None, :]) @ U.conj().transpose(0, 2, 1) @ Li
+    return np.einsum("fmn,nft->mft", W, X)
 
 
 # ---------------------------------------------------------------------------
@@ -155,10 +200,33 @@ class Localiser:
         self.sel = sel
         self.srp = SRPPHAT(mic_pos, fs, config.NFFT, self.az, self.el)
         self.sub = SubspaceLocaliser(mic_pos, self.freqs[sel], self.az, self.el)
-        # higher resolution SRP for the RPM mask method
+        # the STFT of method B (config.MASK_NFFT)
         self.freqs_hr = np.fft.rfftfreq(config.MASK_NFFT, 1 / fs)
         self.band_hr = (self.freqs_hr >= config.BAND_HZ[0]) & (self.freqs_hr <= config.BAND_HZ[1])
-        self.srp_hr = SRPPHAT(mic_pos, fs, config.MASK_NFFT, self.az, self.el, interp=2)
+        self.srp_hr = SRPPHAT(mic_pos, fs, config.MASK_NFFT, self.az, self.el, interp=max(1, 8192 // config.MASK_NFFT))
+        # frame alignment uses one fixed SRP-PHAT, so it is the same in every ablation setting
+        freqs_ref = np.fft.rfftfreq(config.REF_NFFT, 1 / fs)
+        self.band_ref = ((freqs_ref >= config.REF_BAND_HZ[0]) & (freqs_ref <= config.REF_BAND_HZ[1])).astype(float)
+        self.srp_ref = SRPPHAT(mic_pos, fs, config.REF_NFFT, self.az, self.el)
+        # ablation: each method with the STFT, band and frequency weighting of its own paper (config.ORIGINAL_SETTINGS)
+        self.original = config.PROTOCOL == "original"
+        if self.original:
+            self.groups = {}
+            for g, p in config.ORIGINAL_SETTINGS.items():
+                nfft, hop = int(round(p["frame"] * fs)), int(round(p["hop"] * fs))
+                freqs = np.fft.rfftfreq(nfft, 1 / fs)
+                sel_g = np.where((freqs >= p["band"][0]) & (freqs <= p["band"][1]))[0]
+                self.groups[g] = {"nfft": nfft, "hop": hop, "freqs": freqs, "sel": sel_g}
+            gA = self.groups["A"]
+            self.band_A = np.isin(np.arange(len(gA["freqs"])), gA["sel"]).astype(float)
+            self.srp_A = SRPPHAT(mic_pos, fs, gA["nfft"], self.az, self.el)
+            self.sub_g = {g: SubspaceLocaliser(mic_pos, self.groups[g]["freqs"][self.groups[g]["sel"]], self.az, self.el)
+                          for g in ("CD", "E")}
+
+    def reference_A(self, x):
+        """SRP-PHAT with fixed settings, used only to align the array and ground-truth frames."""
+        _, X = stft_multi(x, self.fs, config.REF_NFFT, config.REF_HOP)
+        return self.peak(self.srp_ref.spectrum(X, self.band_ref))
 
     def peak(self, spec):
         k = int(np.argmax(spec))
@@ -170,14 +238,20 @@ class Localiser:
         f0s are the four rotor shaft rates in turns/s for this window.
         Returns {method: (azimuth, elevation)} in the array frame.
         """
+        if self.original:
+            return self._run_original(x, f0s, ncm_model, mean_speed, methods)
         _, X = stft_multi(x, self.fs)
         res = {}
-        base_w = self.band.astype(float)
+        # with MASK_NFFT equal to NFFT, A and B share one STFT and B differs from A only by the tone mask
+        if "A_SRP-PHAT" in methods or ("B_SRP-PHAT+RPMmask" in methods and f0s is not None):
+            _, Xh = stft_multi(x, self.fs, config.MASK_NFFT, config.MASK_HOP)
         if "A_SRP-PHAT" in methods:
-            res["A_SRP-PHAT"] = self.peak(self.srp.spectrum(X, base_w))
+            if config.MASK_NFFT == config.NFFT:
+                res["A_SRP-PHAT"] = self.peak(self.srp_hr.spectrum(Xh, self.band_hr.astype(float)))
+            else:   # B on a finer STFT than A, as in the DREGON flight table of the paper (MASK_NFFT=4096, MASK_HOP=1024)
+                res["A_SRP-PHAT"] = self.peak(self.srp.spectrum(X, self.band.astype(float)))
         if "B_SRP-PHAT+RPMmask" in methods and f0s is not None:
             import rotor
-            _, Xh = stft_multi(x, self.fs, config.MASK_NFFT, config.MASK_HOP)
             psd = np.mean(np.abs(Xh) ** 2, axis=(0, 2))
             m = rotor.tonal_mask(self.freqs_hr, f0s, psd, self.band_hr)
             self.last_mask_share = m.sum() / self.band_hr.sum()
@@ -191,6 +265,41 @@ class Localiser:
                 res["D_GEVD-MUSIC_globalNCM"] = self.peak(self.sub.spectrum(Rx, ncm_model.global_ncm))
             if ncm_model is not None and mean_speed is not None and "E_GEVD-MUSIC_rpmNCM" in methods:
                 res["E_GEVD-MUSIC_rpmNCM"] = self.peak(self.sub.spectrum(Rx, ncm_model.for_speed(mean_speed)))
+        return res
+
+    def group_cov(self, x, g):
+        p = self.groups[g]
+        _, X = stft_multi(x, self.fs, p["nfft"], p["hop"])
+        return spatial_cov(X, p["sel"])
+
+    def _run_original(self, x, f0s, ncm_model, mean_speed, methods):
+        """ncm_model is {"CD": NoiseCovModel, "E": NoiseCovModel}, each learned with the STFT of its group.
+        B is our own baseline and has no original setting, so it keeps the shared STFT.
+        A computes one SRP-PHAT response per block (DiBiase 2000, Sect. 7.1, Eqs. 6.14-6.15). The responses are
+        summed over the window, so that A is scored once per window like the other methods."""
+        res = {}
+        if "A_SRP-PHAT" in methods:
+            gA = self.groups["A"]
+            _, X = stft_multi(x, self.fs, gA["nfft"], gA["hop"])
+            res["A_SRP-PHAT"] = self.peak(sum(self.srp_A.spectrum(X[:, :, b:b + 1], self.band_A) for b in range(X.shape[2])))
+        if "B_SRP-PHAT+RPMmask" in methods and f0s is not None:
+            import rotor
+            _, Xh = stft_multi(x, self.fs, config.MASK_NFFT, config.MASK_HOP)
+            psd = np.mean(np.abs(Xh) ** 2, axis=(0, 2))
+            m = rotor.tonal_mask(self.freqs_hr, f0s, psd, self.band_hr)
+            self.last_mask_share = m.sum() / self.band_hr.sum()
+            res["B_SRP-PHAT+RPMmask"] = self.peak(self.srp_hr.spectrum(Xh, self.band_hr * (~m)))
+        if "C_MUSIC" in methods or (ncm_model is not None and "D_GEVD-MUSIC_globalNCM" in methods):
+            Rx = self.group_cov(x, "CD")
+            if "C_MUSIC" in methods:
+                res["C_MUSIC"] = self.peak(self.sub_g["CD"].spectrum(Rx, style="nakamura"))
+            if ncm_model is not None and "D_GEVD-MUSIC_globalNCM" in methods:
+                res["D_GEVD-MUSIC_globalNCM"] = self.peak(
+                    self.sub_g["CD"].spectrum(Rx, ncm_model["CD"].global_ncm, style="nakamura"))
+        if ncm_model is not None and mean_speed is not None and "E_GEVD-MUSIC_rpmNCM" in methods:
+            Rx = self.group_cov(x, "E")
+            res["E_GEVD-MUSIC_rpmNCM"] = self.peak(
+                self.sub_g["E"].spectrum(Rx, ncm_model["E"].for_speed(mean_speed), style="furukawa"))
         return res
 
 

@@ -32,6 +32,9 @@ import dregon_io
 import localisation as loc
 
 NFFT, HOP = config.NFFT, config.HOP
+if config.PROTOCOL == "original":                    # STFT of the MVDR study we follow, scaled to our sampling rate
+    NFFT = int(round(config.ORIGINAL_MVDR_FRAME_SEC * config.FS))
+    HOP = NFFT // 2
 LISTEN_FLIGHT = config.SOURCE_FLIGHTS[0]   # loud source
 LISTEN_START_S, LISTEN_SEC = 20.0, 10.0
 MIX_SNR_DB = -10                           # input SNR for part 2, where experiment 3 shows the methods split
@@ -202,7 +205,7 @@ def snr_gain(locz, scale, plt):
     fs = noise_rec["fs"]
     N = len(noise_rec["audio"])
     half = N // 2
-    ncm_band = common.build_ncm_model(noise_rec, locz.sel, sample_range=(0, half))
+    ncm_band = common.build_noise_models(locz, noise_rec, sample_range=(0, half))
     ncm_full = FullBandNoiseModel(noise_rec, sample_range=(0, half))
     freqs = np.fft.rfftfreq(NFFT, 1 / fs)
     w = int(1.0 * fs)
@@ -339,7 +342,7 @@ def main():
     metrics["snr_gain"], _, _ = snr_gain(locz, scale, plt)
     # full noise flight for the listening example, as in experiment 2
     noise_rec = dregon_io.load_recording(config.NOISE_ONLY_FLIGHT)
-    ncm_band = common.build_ncm_model(noise_rec, locz.sel)
+    ncm_band = common.build_noise_models(locz, noise_rec)
     ncm_full = FullBandNoiseModel(noise_rec)
     del noise_rec
     metrics["listening"] = listening_demo(locz, ncm_band, ncm_full, scale, plt)

@@ -1,5 +1,5 @@
 # Results summary
-Generated 2026-10-27 11:51 from the data in `DREGON`.
+Generated 2026-11-09 16:47 from the data in `DREGON`.
 
 ## Experiment 1. How much of the ego-noise does the motor log predict?
 Motor speeds used are the **measured** values, converted with scale 1 to turns per second.
@@ -75,7 +75,7 @@ Share of windows within 10° / median error, single-source development tasks.
 | Quadrotor (DREGON) | 15.7% | 10.1 dB | 5.6 dB |
 | DJI Phantom 4 Pro | 8.6% | 8.2 dB | 19.0 dB |
 | Quadrotor in anechoic chamber | 34.4% | 12.9 dB | geometry not published |
-| MK Quadro V3 | 69.7% | 8.6 dB | 5.9 dB |
+| MK Quadro V3 | 69.7% | 8.6 dB | 6.6 dB |
 | Intel Aero | 1.2% | 6.0 dB | geometry not published |
 
 ![](exp6_multidrone.png)
@@ -86,4 +86,4 @@ Share of windows within 10° / median error, single-source development tasks.
 ![](exp7_jitter_vs_tonal_share.png)
 ![](exp7_smeared_harmonics.png)
 
-Total run time 33.2 minutes.
+Total run time 31.7 minutes.

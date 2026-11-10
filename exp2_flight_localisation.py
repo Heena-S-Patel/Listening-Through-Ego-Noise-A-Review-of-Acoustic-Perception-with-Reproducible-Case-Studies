@@ -33,8 +33,7 @@ def calibrate(locz, rec_cal):
         az, el, ok = dregon_io.source_dir_at(rec_cal, np.array([t_mid]))
         if not ok[0]:
             continue
-        r = locz.run(rec_cal["audio"][s:s + w], methods=["A_SRP-PHAT"])
-        est.append(r["A_SRP-PHAT"])
+        est.append(locz.reference_A(rec_cal["audio"][s:s + w]))
         gt.append((az[0], el[0]))
     est, gt = np.array(est), np.array(gt)
     return loc.fit_frame_alignment(est[:, 0], est[:, 1], gt[:, 0], gt[:, 1])
@@ -48,7 +47,7 @@ def main(quick=False):
     scale = common.get_speed_scale(noise_rec)
     locz = loc.Localiser(fs)
     print("  learning noise covariance from the noise-only flight")
-    ncm = common.build_ncm_model(noise_rec, locz.sel)
+    ncm = common.build_noise_models(locz, noise_rec)
     del noise_rec
 
     # frame alignment
@@ -171,7 +170,7 @@ def main(quick=False):
     plt.close(fig)
 
     # figure, angular spectra for one example window
-    if example is not None:
+    if example is not None and not locz.original:
         xw, f0s, msp, gaz, gel, name, tsec = example
         X = common.window_stft(xw, fs)
         Rx = loc.spatial_cov(X, locz.sel)

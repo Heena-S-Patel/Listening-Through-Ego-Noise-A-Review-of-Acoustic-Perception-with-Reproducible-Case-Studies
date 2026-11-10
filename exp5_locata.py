@@ -89,12 +89,20 @@ def source_dir_local(rec, t, pos, R):
     return np.rad2deg(np.arctan2(v[1], v[0])), np.rad2deg(np.arcsin(np.clip(v[2], -1, 1)))
 
 
+def subspace_setup(locz):
+    """STFT size, hop, selected bins, localiser and spectrum style for the subspace methods (C, D)."""
+    if locz.original:
+        g = locz.groups["CD"]
+        return g["nfft"], g["hop"], g["sel"], locz.sub_g["CD"], "nakamura"
+    return config.NFFT, config.HOP, locz.sel, locz.sub, "shared"
+
+
 def noise_covariance(locz, x, vad, fs, guard_sec=None):
     """Spatial covariance from STFT frames in which the source is silent, and has been silent for guard_sec,
     so that the reverberant tail of the speech (T60 about 0.5 s) does not leak into the noise model."""
     guard_sec = GUARD_SEC if guard_sec is None else guard_sec
-    _, X = loc.stft_multi(x, fs)
-    hop, nfft = config.HOP, config.NFFT
+    nfft, hop, sel, _, _ = subspace_setup(locz)
+    _, X = loc.stft_multi(x, fs, nfft, hop)
     g = int(guard_sec * fs)
     busy = np.convolve(vad > 0, np.ones(2 * g + 1), mode="same") > 0 if g > 0 else vad > 0
     starts = np.arange(X.shape[2]) * hop
@@ -102,7 +110,7 @@ def noise_covariance(locz, x, vad, fs, guard_sec=None):
     if silent.sum() < MIN_NOISE_FRAMES and guard_sec > 0:       # too little silence: fall back to no guard
         Phi, n, _ = noise_covariance(locz, x, vad, fs, guard_sec=0.0)
         return Phi, n, 0.0
-    Xs = X[:, locz.sel, :len(silent)][:, :, silent]
+    Xs = X[:, sel, :len(silent)][:, :, silent]
     return np.einsum("mft,nft->fmn", Xs, Xs.conj()) / max(1, Xs.shape[2]), int(silent.sum()), guard_sec
 
 
@@ -144,10 +152,11 @@ def main():
                 gaz, gel = source_dir_local(rec, t_mid, pos, R)
                 xw = rec["x"][s:s + w]
                 res = locz.run(xw, methods=["A_SRP-PHAT", "C_MUSIC"])
-                _, X = loc.stft_multi(xw, fs)
-                Rx = loc.spatial_cov(X, locz.sel)
-                res["D_GEVD-MUSIC_globalNCM"] = locz.peak(locz.sub.spectrum(Rx, Phi))
-                res["D0_GEVD-MUSIC_noguard"] = locz.peak(locz.sub.spectrum(Rx, Phi0))
+                nfft, hop, sel, sub, style = subspace_setup(locz)
+                _, X = loc.stft_multi(xw, fs, nfft, hop)
+                Rx = loc.spatial_cov(X, sel)
+                res["D_GEVD-MUSIC_globalNCM"] = locz.peak(sub.spectrum(Rx, Phi, style=style))
+                res["D0_GEVD-MUSIC_noguard"] = locz.peak(sub.spectrum(Rx, Phi0, style=style))
                 p_active.append(np.real(np.trace(Rx, axis1=1, axis2=2)).mean())
                 row = {"task": task, "recording": name, "time_s": float(t_mid - rec["t"][0]), "gt_az": gaz, "gt_el": gel}
                 for m, (az, el) in res.items():
@@ -159,7 +168,7 @@ def main():
             snr = 10 * np.log10(max(np.mean(p_active) - p_noise, 1e-12) / p_noise)
             diag.append({"task": task, "recording": name, "windows": kept, "noise_frames": n_noise,
                          "guard_used_s": used_guard, "snr_db": float(snr), "noise_top4_share": top_k_share(Phi0),
-                         "diffuse_top4_share": diffuse_top_k_share(mics0, locz.freqs[locz.sel])})
+                         "diffuse_top4_share": diffuse_top_k_share(mics0, np.fft.rfftfreq(subspace_setup(locz)[0], 1 / fs)[subspace_setup(locz)[2]])})
             print(f"  task {task} {name}: {kept} active windows, noise model from {n_noise} frames "
                   f"(guard {used_guard} s), SNR {snr:5.1f} dB, noise energy in 4 strongest directions "
                   f"{100 * diag[-1]['noise_top4_share']:4.1f}% (diffuse {100 * diag[-1]['diffuse_top4_share']:4.1f}%)")

@@ -9,6 +9,8 @@ so drones with different arrays can be compared.
 
     tonal share       share of 100-4000 Hz noise energy in narrow spectral peaks (>= 6 dB above a 300 Hz
                       running-median floor, 8192-point spectra on 1 s chunks). High = rotor tones dominate.
+    HNR               harmonic-to-noise ratio in dB (Boersma 1993, Praat autocorrelation method via parselmouth),
+                      an established periodicity measure in the same 100-4000 Hz band, reported alongside the tonal share as a check.
     spatial rank      share of 300-4000 Hz noise energy in the 4 strongest eigenvectors of the 8x8 spatial
                       covariance (one per rotor on a quadrotor). Spatially white noise would give 4/8 = 50%.
     learned rejection noise power removed (dB) from the SECOND half of a recording by projecting out the
@@ -96,6 +98,23 @@ def tonal_share(x, fs, band=(100, 4000), chunk_sec=1.0):
     return float(np.mean(shares))
 
 
+def hnr_db(x, fs, band=(100, 4000), min_pitch=50.0):
+    """Harmonic-to-noise ratio (Boersma 1993), computed with Praat's autocorrelation method through parselmouth
+    and averaged over the channels. The signal is first limited to the band of the tonal share. Praat's default
+    settings, except a 50 Hz minimum pitch so that rotor shaft rates down to 50 rev/s are covered.
+    Silent channels (MK Quadro channel 7) are skipped."""
+    import parselmouth
+    sos = scipy.signal.butter(8, band, "bandpass", fs=fs, output="sos")
+    vals = []
+    for m in range(x.shape[1]):
+        c = scipy.signal.sosfiltfilt(sos, x[:, m].astype(float))
+        if not np.any(c):
+            continue
+        h = parselmouth.Sound(c, sampling_frequency=fs).to_harmonicity_ac(minimum_pitch=min_pitch)
+        vals.append(parselmouth.praat.call(h, "Get mean", 0, 0))
+    return float(np.mean(vals))
+
+
 def covariances(x, fs, band=BAND):
     """Per-bin spatial covariances in the band, each normalised to unit trace so every bin counts equally."""
     f, _, X = scipy.signal.stft(x.T, fs=fs, nperseg=NFFT, noverlap=NFFT // 2)
@@ -126,31 +145,33 @@ def main():
     print("Experiment 6  ego-noise across drones")
     rows = []
     for name, drone, spec in RECORDINGS:
-        tonal, rank, rej, dur, freqs = [], [], [], 0.0, None
+        tonal, hnr, rank, rej, dur, freqs, live = [], [], [], [], 0.0, None, np.zeros(8, dtype=bool)
         for x, fs in segments(name, spec):
             if x.shape[1] != 8:
                 print(f"  skipping a {x.shape[1]}-channel file of {name}")
                 continue
             dur += len(x) / fs
+            live |= np.any(x != 0, axis=0)
             half = len(x) // 2
             tonal.append(tonal_share(x, fs))
+            hnr.append(hnr_db(x, fs))
             R_all, freqs = covariances(x, fs)
             rank.append(spatial_rank(R_all))
             rej.append(learned_rejection_db(covariances(x[:half], fs)[0], covariances(x[half:], fs)[0]))
         if not tonal:
             continue
         row = {"name": name, "drone": drone, "seconds": round(dur, 1), "files": len(tonal),
-               "tonal_share": float(np.mean(tonal)), "spatial_rank4": float(np.mean(rank)),
+               "tonal_share": float(np.mean(tonal)), "hnr_db": float(np.mean(hnr)), "spatial_rank4": float(np.mean(rank)),
                "learned_rejection_db": float(np.mean(rej)), "diffuse_rank4": None, "diffuse_rejection_db": None}
         if name in GEOMETRY:
-            G = diffuse_covariance(GEOMETRY[name], freqs)
+            G = diffuse_covariance(GEOMETRY[name][live], freqs)   # silent channels (MK Quadro channel 7) are left out
             G = G / np.real(np.trace(G, axis1=1, axis2=2))[:, None, None]
             row["diffuse_rank4"] = spatial_rank(G)
             row["diffuse_rejection_db"] = learned_rejection_db(G, G)
         rows.append(row)
         ref = (f"(diffuse field on this array: {100 * row['diffuse_rank4']:4.1f}%, {row['diffuse_rejection_db']:4.1f} dB)"
                if row["diffuse_rank4"] is not None else "(array geometry not published)")
-        print(f"  {name:20s} {drone:30s} {dur:6.1f} s  tonal {100 * row['tonal_share']:5.1f}%  "
+        print(f"  {name:20s} {drone:30s} {dur:6.1f} s  tonal {100 * row['tonal_share']:5.1f}%  HNR {row['hnr_db']:5.1f} dB  "
               f"top-4 spatial {100 * row['spatial_rank4']:5.1f}%  learned rejection {row['learned_rejection_db']:5.1f} dB  {ref}")
 
     with open(common.results_path("exp6_multidrone.csv"), "w", newline="") as f:

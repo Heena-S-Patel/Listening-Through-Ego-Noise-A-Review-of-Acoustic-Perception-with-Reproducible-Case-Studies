@@ -29,7 +29,7 @@ def main():
     locz = loc.Localiser(fs)
     N = len(noise_rec["audio"])
     half = N // 2
-    ncm = common.build_ncm_model(noise_rec, locz.sel, sample_range=(0, half))
+    ncm = common.build_noise_models(locz, noise_rec, sample_range=(0, half))
 
     clean = dregon_io.list_clean_recordings()
     if not clean:
@@ -45,8 +45,7 @@ def main():
         if len(seg) < w:
             continue
         sigs.append((az, el, seg))
-        r = locz.run(seg, methods=["A_SRP-PHAT"])
-        est.append(r["A_SRP-PHAT"])
+        est.append(locz.reference_A(seg))
         gt.append((az, el))
     est, gt = np.array(est), np.array(gt)
     al = loc.fit_frame_alignment(est[:, 0], est[:, 1], gt[:, 0], gt[:, 1])

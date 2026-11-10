@@ -1,0 +1,95 @@
+{
+  "chance_azimuth_within20": 11.11111111111111,
+  "data1": {
+    "whistle_windows": 175,
+    "whistle_off_windows": 50,
+    "A": {
+      "source1": {
+        "offset": 142,
+        "median_azimuth_error": 87.8075019351898,
+        "azimuth_within20": 16.57142857142857,
+        "within20": 2.2857142857142856
+      },
+      "source2": {
+        "offset": 248,
+        "median_azimuth_error": 81.58098490123929,
+        "azimuth_within20": 11.428571428571429,
+        "within20": 3.428571428571429
+      }
+    },
+    "D": {
+      "source1": {
+        "offset": 180,
+        "median_azimuth_error": 49.414893396280775,
+        "azimuth_within20": 25.71428571428571,
+        "within20": 8.0
+      },
+      "source2": {
+        "offset": 352,
+        "median_azimuth_error": 29.00865522185427,
+        "azimuth_within20": 32.0,
+        "within20": 27.42857142857143
+      }
+    },
+    "F": {
+      "source1": {
+        "offset": 134,
+        "median_azimuth_error": 86.24166062778008,
+        "azimuth_within20": 16.57142857142857,
+        "within20": 4.0
+      },
+      "source2": {
+        "offset": 202,
+        "median_azimuth_error": 87.52738557320276,
+        "azimuth_within20": 13.714285714285715,
+        "within20": 4.571428571428571
+      }
+    }
+  },
+  "data2": {
+    "whistle_windows": 125,
+    "whistle_off_windows": 225,
+    "A": {
+      "source1": {
+        "offset": 23,
+        "median_azimuth_error": 78.79707029763414,
+        "azimuth_within20": 6.4,
+        "within20": 0.0
+      },
+      "source2": {
+        "offset": 179,
+        "median_azimuth_error": 81.31926600268025,
+        "azimuth_within20": 9.6,
+        "within20": 4.0
+      }
+    },
+    "D": {
+      "source1": {
+        "offset": 26,
+        "median_azimuth_error": 74.5715663423922,
+        "azimuth_within20": 6.4,
+        "within20": 1.6
+      },
+      "source2": {
+        "offset": 23,
+        "median_azimuth_error": 29.156142834721464,
+        "azimuth_within20": 26.400000000000002,
+        "within20": 12.8
+      }
+    },
+    "F": {
+      "source1": {
+        "offset": 17,
+        "median_azimuth_error": 81.27539790658065,
+        "azimuth_within20": 13.600000000000001,
+        "within20": 7.199999999999999
+      },
+      "source2": {
+        "offset": 119,
+        "median_azimuth_error": 78.02484167638252,
+        "azimuth_within20": 16.0,
+        "within20": 6.4
+      }
+    }
+  }
+}

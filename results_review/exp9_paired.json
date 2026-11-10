@@ -1,0 +1,122 @@
+{
+ "E+mask1024 vs E": {
+  "first": 69.8,
+  "second": 72.6,
+  "diff": 2.8,
+  "ci5s": [
+   0.8,
+   5.1
+  ],
+  "signflip_p": 0.1226,
+  "mcnemar": {
+   "only_first": 3,
+   "only_second": 14,
+   "p": 0.012725830078125
+  }
+ },
+ "E+mask4096 vs E": {
+  "first": 69.8,
+  "second": 70.6,
+  "diff": 0.8,
+  "ci5s": [
+   -1.3,
+   3.6
+  ],
+  "signflip_p": 0.8748,
+  "mcnemar": {
+   "only_first": 5,
+   "only_second": 8,
+   "p": 0.5810546875
+  }
+ },
+ "D+mask1024 vs D": {
+  "first": 60.4,
+  "second": 64.5,
+  "diff": 4.1,
+  "ci5s": [
+   2.0,
+   6.4
+  ],
+  "signflip_p": 0.0129,
+  "mcnemar": {
+   "only_first": 2,
+   "only_second": 18,
+   "p": 0.0004024505615234375
+  }
+ },
+ "D+mask4096 vs D": {
+  "first": 60.4,
+  "second": 64.5,
+  "diff": 4.1,
+  "ci5s": [
+   1.5,
+   6.9
+  ],
+  "signflip_p": 0.0195,
+  "mcnemar": {
+   "only_first": 2,
+   "only_second": 18,
+   "p": 0.0004024505615234375
+  }
+ },
+ "GP rotor vs E": {
+  "first": 69.8,
+  "second": 69.8,
+  "diff": 0.0,
+  "ci5s": [
+   -2.3,
+   2.3
+  ],
+  "signflip_p": 1.0,
+  "mcnemar": {
+   "only_first": 11,
+   "only_second": 11,
+   "p": 1.0
+  }
+ },
+ "GP rotor+imu vs E": {
+  "first": 69.8,
+  "second": 70.8,
+  "diff": 1.0,
+  "ci5s": [
+   -2.3,
+   4.6
+  ],
+  "signflip_p": 0.6494,
+  "mcnemar": {
+   "only_first": 12,
+   "only_second": 16,
+   "p": 0.5715881884098053
+  }
+ },
+ "GP rotor vs D": {
+  "first": 60.4,
+  "second": 69.8,
+  "diff": 9.5,
+  "ci5s": [
+   5.4,
+   13.6
+  ],
+  "signflip_p": 0.0077,
+  "mcnemar": {
+   "only_first": 4,
+   "only_second": 41,
+   "p": 9.334883088740753e-09
+  }
+ },
+ "GP rotor+imu vs D": {
+  "first": 60.4,
+  "second": 70.8,
+  "diff": 10.5,
+  "ci5s": [
+   6.1,
+   14.8
+  ],
+  "signflip_p": 0.008,
+  "mcnemar": {
+   "only_first": 7,
+   "only_second": 48,
+   "p": 1.3087586125948292e-08
+  }
+ }
+}

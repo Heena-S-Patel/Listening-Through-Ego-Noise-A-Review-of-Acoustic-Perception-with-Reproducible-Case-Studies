@@ -1,0 +1,59 @@
+{
+  "motors_off": {
+    "A": {
+      "fit": {
+        "median_err": 2.2252974169664963,
+        "offset": 92,
+        "az_sign": 1,
+        "el_sign": 1
+      },
+      "signed_az_deg": -0.24394755263207912,
+      "signed_el_deg": -0.5327533339187474,
+      "within10_table3_offset": 96.42857142857143
+    },
+    "C": {
+      "fit": {
+        "median_err": 5.719627542198237,
+        "offset": 91,
+        "az_sign": 1,
+        "el_sign": 1
+      },
+      "signed_az_deg": 2.1702423736496854,
+      "signed_el_deg": -5.12960838946122,
+      "within10_table3_offset": 63.49206349206349,
+      "within10_own_offset": 63.888888888888886,
+      "within10_own_offset_and_el": 97.61904761904762,
+      "el_shift": 5.12960838946122
+    }
+  },
+  "flights": {
+    "delta_az_deg": -2,
+    "el_shift_deg": 5.12960838946122,
+    "C": {
+      "table3": 23.273657289002557,
+      "own_offset": 23.52941176470588,
+      "own_offset_and_el": 23.017902813299234,
+      "within20_table3": 25.31969309462916
+    },
+    "D": {
+      "table3": 60.35805626598465,
+      "own_offset": 60.35805626598465,
+      "own_offset_and_el": 59.07928388746802,
+      "within20_table3": 63.171355498721226
+    },
+    "E": {
+      "table3": 69.82097186700767,
+      "own_offset": 69.82097186700767,
+      "own_offset_and_el": 68.79795396419436,
+      "within20_table3": 74.16879795396419
+    },
+    "A": {
+      "table3": 18.414322250639387,
+      "within20_table3": 20.460358056265985
+    },
+    "F": {
+      "table3": 71.35549872122762,
+      "within20_table3": 74.68030690537084
+    }
+  }
+}

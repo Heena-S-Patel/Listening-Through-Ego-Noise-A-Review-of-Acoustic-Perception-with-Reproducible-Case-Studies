@@ -11,7 +11,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RES = os.environ.get("RESULTS_DIR", os.path.normpath(os.path.join(HERE, "..", "results")))
-OUT = os.path.normpath(os.path.join(HERE, "..", "papers", "icci2026", "fig"))
+OUT = os.environ.get("FIG_DIR", os.path.normpath(os.path.join(HERE, "..", "papers", "icci2026", "fig")))
 plt.rcParams.update({"font.size": 9, "axes.grid": True, "grid.alpha": 0.3, "savefig.dpi": 300,
                      "axes.spines.top": False, "axes.spines.right": False})
 
@@ -31,9 +31,9 @@ def tracking():
             gt = np.array([float(r[f"gt_{key}"]) for r in rr])
             if key == "az":                                   # do not draw a line across the +-180 deg wrap
                 gt[np.r_[False, np.abs(np.diff(gt)) > 180]] = np.nan
-            ax.plot(t, gt, "-", color="k", lw=1.2, label="true direction")
+            ax.plot(t, gt, "-", color="k", lw=0.9, label="true direction", zorder=4)   # drawn on top of the estimates
             for m, lab, col in methods:
-                ax.plot(t, [float(r[f"{m}_{key}"]) for r in rr], ".", ms=2.5, color=col, label=lab)
+                ax.plot(t, [float(r[f"{m}_{key}"]) for r in rr], ".", ms=2.5, color=col, label=lab, zorder=2)
             ax.set(ylabel=("azimuth" if key == "az" else "elevation") + " (deg)",
                    ylim=(-180, 180) if key == "az" else (-90, 90))
             ax.set_yticks([-180, -90, 0, 90, 180] if key == "az" else [-90, -45, 0, 45, 90])
@@ -49,16 +49,16 @@ def tracking():
 
 def snr_by_frequency():
     d = json.load(open(os.path.join(RES, "exp4_metrics.json")))["snr_gain"]["snr_by_third_octave_db"]
-    curves = [("input", "single microphone (input)", "k", "--"), ("delay_and_sum", "delay-and-sum", "#7f7f7f", "-"),
-              ("mvdr_global", "MVDR, one noise model", "#ff7f0e", "-"), ("mvdr_rpm", "MVDR, speed-binned", "#d62728", "-")]
-    fig, ax = plt.subplots(figsize=(4.0, 2.3))
+    curves = [("input", "single microphone", "k", "--"), ("delay_and_sum", "delay-and-sum", "#7f7f7f", "-"),
+              ("mvdr_global", "MVDR, one model", "#ff7f0e", "-"), ("mvdr_rpm", "MVDR, speed-binned", "#d62728", "-")]
+    fig, ax = plt.subplots(figsize=(2.9, 2.75))          # sized to sit next to Fig. 3 at 0.4 text width
     for key, lab, col, ls in curves:
         fc = np.array([float(k) for k in d[key]])
         ax.semilogx(fc, list(d[key].values()), ls, color=col, lw=1.4, label=lab)
     ax.set(xlabel="frequency (Hz)", ylabel="SNR (dB)", ylim=(-45, 17))
     ax.set_xticks([125, 250, 500, 1000, 2000, 4000, 8000], ["125", "250", "500", "1k", "2k", "4k", "8k"])
     ax.set_xticks([], minor=True)
-    ax.legend(fontsize=7, loc="lower right", handlelength=1.8)
+    ax.legend(fontsize=7.5, loc="lower right", handlelength=1.5, framealpha=0.9)
     fig.tight_layout()
     fig.savefig(os.path.join(OUT, "dregon_snr_by_frequency.png"))
     plt.close(fig)
@@ -142,8 +142,9 @@ def jitter():
     plt.close(fig)
 
 
-tracking()
-snr_by_frequency()
-multidrone()
-jitter()
-print("figures written to", OUT)
+if __name__ == "__main__":
+    tracking()
+    snr_by_frequency()
+    multidrone()
+    jitter()
+    print("figures written to", OUT)

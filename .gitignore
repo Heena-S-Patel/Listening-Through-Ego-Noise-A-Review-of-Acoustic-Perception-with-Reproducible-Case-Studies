@@ -2,8 +2,10 @@
 data/*
 !data/README.md
 
-# Generated audio (derived from DREGON recordings)
+# Generated audio (derived from DREGON recordings) and scratch output of the checks
 results/audio/
+results*/audio/
+results_review/scratch/
 
 # Python
 __pycache__/
